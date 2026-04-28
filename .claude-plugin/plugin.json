@@ -1,0 +1,8 @@
+{
+  "name": "ultra-dev-plugin",
+  "description": "A controlled feature-development workflow for Claude Code. Chains four core skills (brainstorm, spec-writing, spec-to-plan, executing-plan) with the human driving every transition, plus three optional aux skills (code-review, test-writing, doc-writing) that run on demand.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Petrina99"
+  }
+}

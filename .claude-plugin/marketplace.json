@@ -1,0 +1,11 @@
+{
+  "name": "ultra-dev-marketplace",
+  "owner": { "name": "Petrina99" },
+  "plugins": [
+    {
+      "name": "ultra-dev-plugin",
+      "source": ".",
+      "description": "Brainstorm → spec → plan → execute workflow with optional review/test/docs aux skills."
+    }
+  ]
+}

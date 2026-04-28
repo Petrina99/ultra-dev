@@ -1,11 +1,21 @@
 {
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "ultra-dev-marketplace",
-  "owner": { "name": "Petrina99" },
+  "description": "Brainstorm to spec to plan to execute workflow with optional review/test/docs aux skills.",
+  "owner": {
+    "name": "Petrina99",
+    "url": "https://github.com/Petrina99"
+  },
   "plugins": [
     {
       "name": "ultra-dev-plugin",
+      "description": "Brainstorm to spec to plan to execute workflow with optional review/test/docs aux skills.",
+      "version": "1.0.0",
       "source": "./",
-      "description": "Brainstorm → spec → plan → execute workflow with optional review/test/docs aux skills."
+      "author": {
+        "name": "Petrina99",
+        "url": "https://github.com/Petrina99"
+      }
     }
   ]
 }

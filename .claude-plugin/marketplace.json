@@ -4,7 +4,7 @@
   "plugins": [
     {
       "name": "ultra-dev-plugin",
-      "source": "./",
+      "source": "./plugins/ultra-dev-plugin",
       "description": "Brainstorm → spec → plan → execute workflow with optional review/test/docs aux skills."
     }
   ]

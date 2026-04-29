@@ -4,7 +4,7 @@
 
 Brainstorm → Spec → Plan → Execute. The human drives every hand-off.
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](.claude-plugin/plugin.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-8A2BE2.svg)](https://docs.claude.com/en/docs/claude-code)
 [![Inspired by superpowers](https://img.shields.io/badge/inspired%20by-superpowers-orange.svg)](https://github.com/obra/superpowers)
 
@@ -133,6 +133,7 @@ Drives batches per the plan's `## Dependencies`, dispatches parallel subagents w
 | [`code-review`](skills/code-review/SKILL.md) | yes | severity-tagged review of branch diff, auto-fix trivial issues |
 | [`test-writing`](skills/test-writing/SKILL.md) | yes | post-hoc test generation for changed files |
 | [`doc-writing`](skills/doc-writing/SKILL.md) | yes | CHANGELOG, README, inline docs, `notes.md` entries |
+| [`erd-writing`](skills/erd-writing/SKILL.md) | yes | introspect a relational DB and render an ERD (`erd.md` + `erd.html`) into the slug dir |
 
 ### code-review
 
@@ -151,6 +152,19 @@ Post-hoc test generator. Reads files changed since the branch base, proposes a t
 Generates documentation artifacts (CHANGELOG entry, README updates, inline docstrings/JSDoc, ultra-dev `notes.md` entry) for recent changes. Renders a menu and produces only the artifacts the user picks.
 
 > **Triggers on:** docs, documentation, changelog, readme, docstring, jsdoc.
+
+### erd-writing
+
+Introspects a live relational database (Postgres, SQLite, or SQL Server) via the bundled `erd.mjs` (alongside the skill's `SKILL.md`) and writes two files into `docs/ultra-dev/<slug>/`:
+
+- `erd.md` — Mermaid `erDiagram` block, intended for LLM context.
+- `erd.html` — self-contained page (Mermaid via CDN); open in a browser to view.
+
+Always confirms before connecting, asks again if the host is non-local, never echoes or persists the connection string. Drivers (`pg`, `better-sqlite3`, `mssql`) install on demand — only the engine you actually use.
+
+Hooks into `executing-plan` two ways: (1) inline prompt after a successful `db`-tagged task, (2) letter `e` in the end-of-plan aux menu.
+
+> **Triggers on:** db, database, schema, migration, ERD, diagram, table, relation, foreign key, FK.
 
 ---
 
@@ -198,6 +212,18 @@ skills/
   code-review/SKILL.md
   test-writing/SKILL.md
   doc-writing/SKILL.md
+  erd-writing/
+    SKILL.md
+    erd.mjs            # ERD generator entrypoint (Node)
+    template.html      # browser-openable Mermaid page
+    queries/
+      postgres.mjs     # introspector — needs `pg`
+      sqlite.mjs       # introspector — needs `better-sqlite3`
+      sqlserver.mjs    # introspector — needs `mssql`
+templates/
+  spec.md              # skeleton dropped by spec-writing
+  plan.md              # skeleton dropped by spec-to-plan
+  notes.md             # skeleton dropped by executing-plan / doc-writing
 ```
 
 ---
@@ -206,5 +232,5 @@ skills/
 
 Planned features:
 
-- [ ] **Template markdown files** — pre-formatted starting templates for `spec.md`, `plan.md`, and `notes.md` so each skill drops a consistent skeleton instead of writing the structure from scratch every time.
-- [ ] **DB-relation diagram scripts** — helper scripts that introspect the project's schema and generate diagrams of database relations (ERDs) for inclusion in the feature directory.
+- [x] **Template markdown files** — pre-formatted starting templates for `spec.md`, `plan.md`, and `notes.md` so each skill drops a consistent skeleton instead of writing the structure from scratch every time. Live under `templates/`.
+- [x] **DB-relation diagram scripts** — bundled inside the `erd-writing` skill (`skills/erd-writing/erd.mjs` + per-engine introspectors). Introspects Postgres / SQLite / SQL Server and writes `erd.md` (Mermaid) + `erd.html` (browser-openable) into the slug dir.

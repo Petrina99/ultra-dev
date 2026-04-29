@@ -16,7 +16,7 @@ Execute the plan at `docs/ultra-dev/<slug>/plan.md`. Drive batches, commits, and
 ## Conventions (verbatim)
 
 - **Slug rule:** kebab-case, max 4 words, lowercase. Collision suffix `-2`, `-3`, ... pick the lowest free integer.
-- **Per-feature dir:** `docs/ultra-dev/<slug>/` contains `spec.md`, `plan.md`, and `notes.md`. `notes.md` is the failure / doc log; create it on first append.
+- **Per-feature dir:** `docs/ultra-dev/<slug>/` contains `spec.md`, `plan.md`, and `notes.md`. `notes.md` is the failure / doc log; create it on first append by copying `templates/notes.md` from the repo root (fall back to a bare `# Notes: <Feature title>` header if the template is missing).
 
 ## Process
 
@@ -85,6 +85,7 @@ For each batch in order:
 **After each task completes successfully:**
 
 - If `commits=per-task`: stage that task's changes and commit with a message referencing the task number and tag(s) from the plan.
+- If the task's tag list contains `db`: prompt once `Generate / refresh ERD now? (yes / no — defaults to no, can run later from the aux menu)`. On `yes`, invoke `erd-writing` via the Skill tool, passing the slug. On `no`, continue.
 
 **After each batch completes successfully:**
 
@@ -101,7 +102,7 @@ On task failure (test failure, compile error, runtime error, anything that preve
 1. **Debug step:** read the error output, locate the likely cause (file, line, symbol), attempt a fix.
 2. **Retry the task:** re-run the same step from the top.
 3. **Up to 3 attempts total** (initial run + 2 retries, or any equivalent count to 3).
-4. **On the 3rd failure:** stop the plan. Append an entry to `docs/ultra-dev/<slug>/notes.md`:
+4. **On the 3rd failure:** stop the plan. Append an entry to `docs/ultra-dev/<slug>/notes.md` under the `## Failure log` section (create the file from `templates/notes.md` if missing):
 
 ```
 ## <ISO timestamp> — Task <N> failed
@@ -123,17 +124,17 @@ After all batches complete (or after the user picks `s` for the last failing tas
 
 ```
 Plan executed. Run aux skills?
-  [r] code-review  [t] test-writing  [d] doc-writing  [n] none / [all]
+  [r] code-review  [t] test-writing  [d] doc-writing  [e] erd-writing  [n] none / [all]
 ```
 
 Parse responses:
 
-- A single letter `r`, `t`, `d`, or `n`.
-- The literal string `all` → run `r`, `t`, `d` in that order.
+- A single letter `r`, `t`, `d`, `e`, or `n`.
+- The literal string `all` → run `r`, `t`, `d`, `e` in that order.
 - The literal string `none` → equivalent to `n`.
-- Multi-letter responses such as `rt` or `rd` → run each named skill in the given order.
+- Multi-letter responses such as `rt`, `rde`, or `rd` → run each named skill in the given order.
 
-Dispatch each chosen aux skill **in sequence (never in parallel)** via the Skill tool by name: `code-review`, `test-writing`, `doc-writing`. Wait for each to complete before starting the next. Do not invoke aux skills mid-run; they only run from this menu.
+Dispatch each chosen aux skill **in sequence (never in parallel)** via the Skill tool by name: `code-review`, `test-writing`, `doc-writing`, `erd-writing`. Wait for each to complete before starting the next. Do not invoke aux skills mid-run except for the inline ERD prompt after a `db`-tagged task.
 
 ### 8. Worktree cleanup
 
@@ -173,7 +174,7 @@ If `worktree=no`, skip this step entirely.
 - Do not auto-trigger.
 - Do not skip the entry prompt, even if defaults look obvious.
 - Do not spawn parallel subagents yourself when `subagents=no`.
-- Do not invoke `code-review`, `test-writing`, or `doc-writing` mid-run; they belong to the end-of-plan aux menu only.
+- Do not invoke `code-review`, `test-writing`, or `doc-writing` mid-run; they belong to the end-of-plan aux menu only. (`erd-writing` may run mid-run, but only via the explicit prompt after a `db`-tagged task.)
 - Do not reference `commands/` or slash commands.
 - Do not validate task tags.
 - Do not remove the worktree on `[s]`.

@@ -39,31 +39,16 @@ Turn a written spec into an executable plan. Input: `docs/ultra-dev/<slug>/spec.
 
 ### 3. Read spec, derive plan
 
-Read `spec.md` end-to-end. Map every acceptance-criteria item to at least one task. Use this 4-section template verbatim:
+Read `spec.md` end-to-end. Map every acceptance-criteria item to at least one task.
 
-```markdown
-# Plan: <Feature title>
+Copy the skeleton from `templates/plan.md` (repo root) into `docs/ultra-dev/<slug>/plan.md`, then replace `<Feature title>` and the example task / dependency / verification lines with the real content. Strip the HTML comment block after filling. Sections, in this exact order — same as the template:
 
-Spec: ./spec.md
+1. `# Plan: <Feature title>` header + `Spec: ./spec.md` link
+2. `## Tasks`
+3. `## Dependencies`
+4. `## Verification`
 
-## Tasks
-
-1. [tag(s)] action — needs: —
-2. [tag(s)] action — needs: 1
-3. [tag(s)] action — needs: 1,2
-
-## Dependencies
-
-- Parallel batch A: tasks 1, 4 (no shared files)
-- Sequential after A: task 2 (depends on 1)
-- Sequential after batch A: task 3 (depends on 1, 2)
-
-## Verification
-
-- [ ] <smoke test or command>
-- [ ] <manual check>
-- [ ] <command output to inspect>
-```
+If `templates/plan.md` is missing, fall back to writing the same four sections inline.
 
 #### Task format (exact)
 

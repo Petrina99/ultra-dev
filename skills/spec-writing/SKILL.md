@@ -40,40 +40,16 @@ If neither condition holds, do not run.
 
 ### 2. Write `docs/ultra-dev/<slug>/spec.md`
 
-Five sections, in this exact order:
+Copy the skeleton from `templates/spec.md` (repo root) into `docs/ultra-dev/<slug>/spec.md`, then fill every `<...>` placeholder. Strip the HTML comment block after filling. Five sections, in this exact order — same as the template:
 
-```markdown
-# <Feature title>
+1. `# <Feature title>`
+2. `## Goal`
+3. `## Scope` (with `**In:**` and `**Out:**` bullet lists)
+4. `## Acceptance criteria`
+5. `## Architecture sketch`
+6. `## Open questions`
 
-## Goal
-
-<1-3 sentences. What the feature is and why it exists. No implementation language.>
-
-## Scope
-
-**In:**
-
-- <bullet>
-- <bullet>
-
-**Out:**
-
-- <bullet>
-- <bullet>
-
-## Acceptance criteria
-
-- [ ] <testable outcome>
-- [ ] <testable outcome>
-
-## Architecture sketch
-
-<Short prose or bullets. Components, data flow, integration points. No code.>
-
-## Open questions
-
-- <bullet, or leave the section empty>
-```
+If `templates/spec.md` is missing (vendored install, pruned tree), fall back to writing the same six headings inline.
 
 Rules:
 

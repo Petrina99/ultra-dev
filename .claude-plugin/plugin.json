@@ -1,7 +1,7 @@
 {
   "name": "ultra-dev-plugin",
-  "description": "A controlled feature-development workflow for Claude Code. Chains four core skills (brainstorm, spec-writing, spec-to-plan, executing-plan) with the human driving every transition, plus aux skills (research, code-review, test-writing, doc-writing, erd-writing) that run on demand. Bundles the context7 MCP server for live library docs.",
-  "version": "1.3.0",
+  "description": "A controlled feature-development workflow for Claude Code. Chains four core skills (brainstorm, spec-writing, spec-to-plan, executing-plan) with the human driving every transition, plus aux skills (research, code-review, test-writing, doc-writing, erd-writing) that run on demand. The research skill expects the user-installed context7 MCP plugin to be available.",
+  "version": "1.4.0",
   "author": {
     "name": "Petrina99"
   }

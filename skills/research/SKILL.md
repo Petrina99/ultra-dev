@@ -1,6 +1,6 @@
 ---
 name: research
-description: Researches libraries, frameworks, services, APIs, and SDKs for an upcoming feature. Pulls live docs via the bundled `context7` MCP server, writes a terse `research.md` to the active feature directory, and prints a short chat summary. Does NOT auto-trigger from generic prompts; runs only when the user invokes it directly or accepts the research offer at the start of `brainstorm`.
+description: Researches libraries, frameworks, services, APIs, and SDKs for an upcoming feature. Pulls live docs via the user-installed `context7` MCP server, writes a terse `research.md` to the active feature directory, and prints a short chat summary. Does NOT auto-trigger from generic prompts; runs only when the user invokes it directly or accepts the research offer at the start of `brainstorm`.
 ---
 
 # research
@@ -18,17 +18,17 @@ If neither condition holds, do not run.
 
 ## Required tooling
 
-This skill depends on the **`context7`** MCP server, bundled via the plugin's `.mcp.json`. It is registered automatically when the plugin is installed.
+This skill depends on the **`context7`** MCP server. It is **not bundled** with `ultra-dev-plugin` — the user must install it themselves (separate `context7` plugin, or a project `.mcp.json` entry pointing at `npx -y @upstash/context7-mcp`). See the README's "Optional: context7 for research" section.
 
-Tools used:
+Tools used (exact tool names depend on how the user installed context7 — match by suffix `__resolve-library-id` and `__query-docs`):
 
-- `mcp__plugin_context7_context7__resolve-library-id` — turn a name (e.g. `react`, `stripe`) into a context7 library ID.
-- `mcp__plugin_context7_context7__query-docs` (or the equivalent docs-fetch tool exposed by the server) — pull current docs for that ID.
+- `*__resolve-library-id` — turn a name (e.g. `react`, `stripe`) into a context7 library ID.
+- `*__query-docs` — pull current docs for that ID.
 
-If the `context7` tools are not available in the current session, stop with:
+If neither tool is available in the current session, stop with:
 
 ```
-Error: context7 MCP server not available. Re-install the ultra-dev plugin or check `.mcp.json`.
+Error: context7 MCP server not available. Install the context7 plugin (or add `npx -y @upstash/context7-mcp` to a project `.mcp.json`) and restart Claude Code. See the README for details.
 ```
 
 Do not fall back to web search or guess from training data — the whole point is current, version-accurate info.

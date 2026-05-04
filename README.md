@@ -4,7 +4,7 @@
 
 Brainstorm → Spec → Plan → Execute. The human drives every hand-off.
 
-[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-1.4.0-blue.svg)](.claude-plugin/plugin.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-8A2BE2.svg)](https://docs.claude.com/en/docs/claude-code)
 [![Inspired by superpowers](https://img.shields.io/badge/inspired%20by-superpowers-orange.svg)](https://github.com/obra/superpowers)
 
@@ -14,7 +14,7 @@ Brainstorm → Spec → Plan → Execute. The human drives every hand-off.
 
 `ultra-dev-plugin` chains four core skills — **brainstorm**, **spec-writing**, **spec-to-plan**, **executing-plan** — into a single deliberate workflow. Five optional aux skills — **research**, **code-review**, **test-writing**, **doc-writing**, **erd-writing** — run on demand.
 
-The plugin also bundles the [`context7`](https://github.com/upstash/context7) MCP server (via `.mcp.json`) so the `research` skill can pull live, version-accurate library docs.
+The `research` skill depends on the [`context7`](https://github.com/upstash/context7) MCP server for live, version-accurate library docs. **Install it yourself** before using `research` — see [Optional: context7 for `research`](#optional-context7-for-research) below.
 
 The plugin enforces one discipline:
 
@@ -55,6 +55,26 @@ In Claude Code, run:
 ```
 
 Restart Claude Code so the skills register. They become available via the `Skill` tool and via the auto-trigger keywords listed below.
+
+### Optional: context7 for `research`
+
+The `research` aux skill calls the [`context7`](https://github.com/upstash/context7) MCP server to pull live library docs. It is **not bundled** with this plugin — install it separately if you want `research` to work. Either:
+
+- Install the official `context7` plugin from its marketplace, or
+- Add a `.mcp.json` to your project with the context7 server entry, e.g.:
+
+  ```json
+  {
+    "mcpServers": {
+      "context7": {
+        "command": "npx",
+        "args": ["-y", "@upstash/context7-mcp"]
+      }
+    }
+  }
+  ```
+
+Restart Claude Code after installing. If context7 is missing, the `research` skill stops with a clear error — every other skill works without it.
 
 ---
 
@@ -147,7 +167,7 @@ Pulls live docs for libraries, frameworks, services, APIs, and SDKs via the bund
 
 `brainstorm` offers research at the start of a session — answer `yes` to run it before clarifying questions, so approach proposals are grounded in current library state. Also runs standalone via the `Skill` tool.
 
-> Does **not** auto-trigger. Runs only when chained from `brainstorm` or invoked explicitly. Requires the `context7` MCP server (auto-registered when the plugin is installed).
+> Does **not** auto-trigger. Runs only when chained from `brainstorm` or invoked explicitly. Requires the user-installed [`context7`](#optional-context7-for-research) MCP server — not bundled with this plugin.
 
 ### code-review
 
@@ -218,7 +238,6 @@ Aux skills (`code-review`, `test-writing`, `doc-writing`) run from the end-of-pl
 .claude-plugin/
   plugin.json          # plugin manifest
   marketplace.json     # marketplace manifest
-.mcp.json              # bundled MCP servers (context7) auto-registered on install
 skills/
   brainstorm/SKILL.md
   spec-writing/SKILL.md

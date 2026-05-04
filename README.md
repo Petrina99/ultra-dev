@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/ultra-dev-plugin.png" alt="ultra-dev-plugin logo" width="320">
+</p>
+
 # ultra-dev-plugin
 
 **A controlled feature-development workflow for Claude Code.**

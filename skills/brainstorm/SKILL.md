@@ -33,6 +33,24 @@ Before asking anything, scan the project:
 
 Do not summarise the repo back to the user unless asked. Use the context to ask sharper questions.
 
+### 1b. Offer research
+
+Before clarifying questions, ask the user verbatim:
+
+```
+Research libraries / frameworks / services for this topic first? (yes / no)
+```
+
+- `no` → continue to step 2.
+- `yes`:
+  1. Derive a preliminary slug from the user's initial topic using the same rule as step 5 (kebab-case, ≤4 words, collision suffix).
+  2. Create `docs/ultra-dev/<slug>/` if it does not yet exist. Show the slug on one line: `Slug: <slug>  (dir: docs/ultra-dev/<slug>/)`.
+  3. Invoke the `research` skill via the Skill tool with that slug in scope.
+  4. When `research` returns, resume at step 2. The research output (and the file at `docs/ultra-dev/<slug>/research.md`) is additional context for clarifying questions and approach proposals.
+  5. At step 5, **reuse the slug derived here** — do not re-derive. If the approved goal diverges from the initial topic, ask the user before renaming the directory.
+
+Skip this step entirely if the user already triggered `research` earlier in the session — do not re-ask.
+
 ### 2. Clarifying questions — one at a time
 
 Loop:

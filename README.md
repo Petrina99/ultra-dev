@@ -4,7 +4,7 @@
 
 Brainstorm → Spec → Plan → Execute. The human drives every hand-off.
 
-[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](.claude-plugin/plugin.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-8A2BE2.svg)](https://docs.claude.com/en/docs/claude-code)
 [![Inspired by superpowers](https://img.shields.io/badge/inspired%20by-superpowers-orange.svg)](https://github.com/obra/superpowers)
 
@@ -12,7 +12,9 @@ Brainstorm → Spec → Plan → Execute. The human drives every hand-off.
 
 ## Overview
 
-`ultra-dev-plugin` chains four core skills — **brainstorm**, **spec-writing**, **spec-to-plan**, **executing-plan** — into a single deliberate workflow. Three optional aux skills — **code-review**, **test-writing**, **doc-writing** — run on demand.
+`ultra-dev-plugin` chains four core skills — **brainstorm**, **spec-writing**, **spec-to-plan**, **executing-plan** — into a single deliberate workflow. Five optional aux skills — **research**, **code-review**, **test-writing**, **doc-writing**, **erd-writing** — run on demand.
+
+The plugin also bundles the [`context7`](https://github.com/upstash/context7) MCP server (via `.mcp.json`) so the `research` skill can pull live, version-accurate library docs.
 
 The plugin enforces one discipline:
 
@@ -25,7 +27,7 @@ Every feature lives in its own slug directory under `docs/ultra-dev/<slug>/`.
 
 ## Status
 
-**In active development.** The four core skills and three aux skills are functional, but the plugin is still evolving. APIs, prompts, and conventions may change between versions. Feedback and issues welcome.
+**In active development.** The four core skills and five aux skills are functional, but the plugin is still evolving. APIs, prompts, and conventions may change between versions. Feedback and issues welcome.
 
 ---
 
@@ -59,12 +61,15 @@ Restart Claude Code so the skills register. They become available via the `Skill
 ## Workflow
 
 ```text
+                ┌─ research (optional, offered at start) ─┐
+                ▼                                         │
 brainstorm  ──yes──▶  spec-writing  ──yes──▶  spec-to-plan  ──yes──▶  executing-plan
                                                                             │
                                                                             ▼
                                                               aux menu: code-review
                                                                         test-writing
                                                                         doc-writing
+                                                                        erd-writing
 ```
 
 Each arrow is a hand-off prompt the user answers `yes` / `no` / `changes: ...`. **No skill auto-advances. No skill skips ahead.**
@@ -130,10 +135,19 @@ Drives batches per the plan's `## Dependencies`, dispatches parallel subagents w
 
 | Skill | Auto-trigger | Purpose |
 | --- | --- | --- |
+| [`research`](skills/research/SKILL.md) | no (chained or explicit) | research libraries / frameworks / services via context7, write `research.md` |
 | [`code-review`](skills/code-review/SKILL.md) | yes | severity-tagged review of branch diff, auto-fix trivial issues |
 | [`test-writing`](skills/test-writing/SKILL.md) | yes | post-hoc test generation for changed files |
 | [`doc-writing`](skills/doc-writing/SKILL.md) | yes | CHANGELOG, README, inline docs, `notes.md` entries |
 | [`erd-writing`](skills/erd-writing/SKILL.md) | yes | introspect a relational DB and render an ERD (`erd.md` + `erd.html`) into the slug dir |
+
+### research
+
+Pulls live docs for libraries, frameworks, services, APIs, and SDKs via the bundled `context7` MCP server. Writes a terse, version-pinned `docs/ultra-dev/<slug>/research.md` (one block per item: version / role / what / why / pricing / license / description / impl notes / links) and prints a short chat summary.
+
+`brainstorm` offers research at the start of a session — answer `yes` to run it before clarifying questions, so approach proposals are grounded in current library state. Also runs standalone via the `Skill` tool.
+
+> Does **not** auto-trigger. Runs only when chained from `brainstorm` or invoked explicitly. Requires the `context7` MCP server (auto-registered when the plugin is installed).
 
 ### code-review
 
@@ -204,11 +218,13 @@ Aux skills (`code-review`, `test-writing`, `doc-writing`) run from the end-of-pl
 .claude-plugin/
   plugin.json          # plugin manifest
   marketplace.json     # marketplace manifest
+.mcp.json              # bundled MCP servers (context7) auto-registered on install
 skills/
   brainstorm/SKILL.md
   spec-writing/SKILL.md
   spec-to-plan/SKILL.md
   executing-plan/SKILL.md
+  research/SKILL.md
   code-review/SKILL.md
   test-writing/SKILL.md
   doc-writing/SKILL.md
@@ -224,6 +240,7 @@ templates/
   spec.md              # skeleton dropped by spec-writing
   plan.md              # skeleton dropped by spec-to-plan
   notes.md             # skeleton dropped by executing-plan / doc-writing
+  research.md          # skeleton dropped by research
 ```
 
 ---

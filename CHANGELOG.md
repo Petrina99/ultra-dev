@@ -2,6 +2,12 @@
 
 All notable changes to `ultra-dev-plugin` are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [SemVer](https://semver.org/).
 
+## [1.5.1] — 2026-05-05
+
+### Added
+
+- `executing-plan`: after each task completes successfully, prepend `[x] ` to the matching numbered line in `plan.md`. Edit is in-place; bundled into the per-task commit when `commits=per-task`.
+
 ## [1.5.0] — 2026-05-05
 
 ### Added

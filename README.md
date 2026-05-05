@@ -8,7 +8,7 @@
 
 Brainstorm → Spec → Plan → Execute. The human drives every hand-off.
 
-[![Version](https://img.shields.io/badge/version-1.5.0-blue.svg)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-1.5.1-blue.svg)](.claude-plugin/plugin.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-8A2BE2.svg)](https://docs.claude.com/en/docs/claude-code)
 [![Inspired by superpowers](https://img.shields.io/badge/inspired%20by-superpowers-orange.svg)](https://github.com/obra/superpowers)
 

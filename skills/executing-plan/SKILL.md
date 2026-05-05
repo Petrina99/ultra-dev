@@ -86,6 +86,7 @@ For each batch in order:
 
 **After each task completes successfully:**
 
+- **Mark the task done in `plan.md`:** prepend `[x] ` immediately after the task number on the matching line under `## Tasks`. Example: `3. [feat] add login form — needs: 1` becomes `3. [x] [feat] add login form — needs: 1`. Edit the file in place; do not rewrite untouched lines. If `commits=per-task`, include this edit in the task's commit.
 - If `commits=per-task`: stage that task's changes and commit using the format spec below.
 - If the task's tag list contains `db`: prompt once `Generate / refresh ERD now? (yes / no — defaults to no, can run later from the aux menu)`. On `yes`, invoke `erd-writing` via the Skill tool, passing the slug. On `no`, continue.
 
@@ -185,6 +186,7 @@ If `worktree=no`, skip this step entirely.
 - [ ] Serial fallback when `subagents=no` (no self-spawned parallelism).
 - [ ] Commits granularity matches user choice.
 - [ ] Commit subject matches `commit-format` spec; no `Co-Authored-By` / Claude attribution trailers.
+- [ ] Each completed task marked `[x]` in `plan.md`.
 - [ ] Failures retried up to 3, logged to `notes.md`, escalated.
 - [ ] Aux menu rendered after the run; selected skills dispatched in sequence.
 - [ ] Worktree merge/PR/skip step rendered when `worktree=yes`; worktree removed only on `[m]` or `[p]`.

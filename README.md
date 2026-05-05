@@ -8,7 +8,7 @@
 
 Brainstorm → Spec → Plan → Execute. The human drives every hand-off.
 
-[![Version](https://img.shields.io/badge/version-1.4.0-blue.svg)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-1.5.0-blue.svg)](.claude-plugin/plugin.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-8A2BE2.svg)](https://docs.claude.com/en/docs/claude-code)
 [![Inspired by superpowers](https://img.shields.io/badge/inspired%20by-superpowers-orange.svg)](https://github.com/obra/superpowers)
 
@@ -143,11 +143,14 @@ Reads `spec.md` and produces `plan.md` with **Tasks**, **Dependencies**, and **V
 Executes `plan.md` end to end. Renders an entry prompt with smart defaults the user can override:
 
 ```text
-branch     = new|current        # forced `new` if current is main/master
-worktree   = yes|no
-subagents  = yes|no             # parallelize independent batches
-commits    = per-task|per-batch|single
+branch        = new|current        # forced `new` if current is main/master
+worktree      = yes|no
+subagents     = yes|no             # parallelize independent batches
+commits       = per-task|per-batch|single
+commit-format = simple|numbered    # `feat - name` vs `T3 - feat - name`
 ```
+
+Commits never include `Co-Authored-By` or `Generated with Claude Code` trailers.
 
 Drives batches per the plan's `## Dependencies`, dispatches parallel subagents when batch size > 1 and `subagents=yes`, retries failed tasks up to 3 times, logs failures to `notes.md`, and ends with an aux-skill menu.
 

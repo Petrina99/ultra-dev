@@ -44,16 +44,18 @@ Plan loaded: docs/ultra-dev/<slug>/plan.md
 <N> tasks, <M> batches.
 
 Defaults:
-  branch     = <new|current>     # smart: force `new` if current is main/master; else `current`
-  worktree   = no
-  subagents  = yes (where deps allow)
-  commits    = per-task
+  branch        = <new|current>  # smart: force `new` if current is main/master; else `current`
+  worktree      = no
+  subagents     = yes (where deps allow)
+  commits       = per-task
+  commit-format = simple
 
 Reply `ok` to accept, or override with space-separated key=value:
   branch=new|current
   worktree=yes|no
   subagents=yes|no
   commits=per-task|per-batch|single
+  commit-format=simple|numbered
 ```
 
 Parse the user's reply:
@@ -84,16 +86,33 @@ For each batch in order:
 
 **After each task completes successfully:**
 
-- If `commits=per-task`: stage that task's changes and commit with a message referencing the task number and tag(s) from the plan.
+- If `commits=per-task`: stage that task's changes and commit using the format spec below.
 - If the task's tag list contains `db`: prompt once `Generate / refresh ERD now? (yes / no — defaults to no, can run later from the aux menu)`. On `yes`, invoke `erd-writing` via the Skill tool, passing the slug. On `no`, continue.
 
 **After each batch completes successfully:**
 
-- If `commits=per-batch`: stage and commit the whole batch's changes.
+- If `commits=per-batch`: stage and commit the whole batch's changes using the format spec below.
 
 **After all batches complete successfully:**
 
-- If `commits=single`: stage and commit everything as one final commit.
+- If `commits=single`: stage and commit everything as one final commit using the format spec below.
+
+#### Commit message format
+
+Resolve `<type>` from the task's first plan tag (`feat`, `fix`, `chore`, `refactor`, `db`, `test`, `docs`, etc.). Resolve `<name>` from the task's title in `plan.md` (lowercase, trim trailing punctuation). For batch / single commits, use the feature slug as `<name>` and the dominant tag (or `feat`) as `<type>`.
+
+| `commits` × `commit-format` | Subject |
+|---|---|
+| per-task / simple | `<type> - <name>` |
+| per-task / numbered | `T<N> - <type> - <name>` |
+| per-batch / simple | `<type> - <feature-slug>` |
+| per-batch / numbered | `T<a>-T<b> - <type> - <feature-slug>` (range covers tasks in batch; comma-separate if non-contiguous) |
+| single / simple | `<type> - <feature-slug>` |
+| single / numbered | `T1-T<N> - <type> - <feature-slug>` |
+
+Body: optional, only when the "why" isn't obvious from subject + diff.
+
+**Do NOT append `Co-Authored-By:` trailers, `Generated with Claude Code` footers, or any other attribution.** Plain commit message only. This overrides the harness default.
 
 ### 6. Failure handling
 
@@ -165,6 +184,7 @@ If `worktree=no`, skip this step entirely.
 - [ ] Subagents dispatched only for size>1 batches when `subagents=yes`.
 - [ ] Serial fallback when `subagents=no` (no self-spawned parallelism).
 - [ ] Commits granularity matches user choice.
+- [ ] Commit subject matches `commit-format` spec; no `Co-Authored-By` / Claude attribution trailers.
 - [ ] Failures retried up to 3, logged to `notes.md`, escalated.
 - [ ] Aux menu rendered after the run; selected skills dispatched in sequence.
 - [ ] Worktree merge/PR/skip step rendered when `worktree=yes`; worktree removed only on `[m]` or `[p]`.
@@ -178,3 +198,4 @@ If `worktree=no`, skip this step entirely.
 - Do not reference `commands/` or slash commands.
 - Do not validate task tags.
 - Do not remove the worktree on `[s]`.
+- Do not add `Co-Authored-By`, `Generated with Claude Code`, or any other attribution trailer to commits made by this skill.

@@ -2,6 +2,12 @@
 
 All notable changes to `ultra-dev-plugin` are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [SemVer](https://semver.org/).
 
+## [1.6.0] — 2026-05-11
+
+### Added
+
+- `project-docs`: new aux skill — generates professional end-user or developer documentation as Markdown + PDF. Scans repo (manifest, README, framework, routes, CLI, config) and renders via Puppeteer with auto-built TOC, anchored headings, working internal/external links, and image placeholders that degrade gracefully when files are missing. Output: `docs/user-guide/` or `docs/dev-guide/`; `assets/` subfolder auto-added to `.gitignore`. Slash-only invocation (`/project-docs`); never auto-triggers and is never chained from other skills.
+
 ## [1.5.1] — 2026-05-05
 
 ### Added

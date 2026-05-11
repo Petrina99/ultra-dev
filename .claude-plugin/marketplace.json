@@ -10,7 +10,7 @@
     {
       "name": "ultra-dev-plugin",
       "description": "Brainstorm to spec to plan to execute workflow with optional research/review/test/docs aux skills. The research skill expects the user-installed context7 MCP plugin.",
-      "version": "1.5.1",
+      "version": "1.6.0",
       "source": "./",
       "author": {
         "name": "Petrina99",

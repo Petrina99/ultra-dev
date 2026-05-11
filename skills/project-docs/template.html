@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{{TITLE}}</title>
+<style>
+  @page { size: A4; }
+  :root {
+    --fg: #1a1a1a;
+    --muted: #5a5a5a;
+    --accent: #2b5fa6;
+    --rule: #e1e4e8;
+    --code-bg: #f5f6f8;
+    --placeholder-bg: #eceff3;
+    --placeholder-fg: #6a6f78;
+  }
+  html, body {
+    font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+    color: var(--fg);
+    font-size: 11pt;
+    line-height: 1.55;
+    margin: 0;
+    padding: 0;
+  }
+  .cover {
+    page-break-after: always;
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 8mm;
+  }
+  .cover h1 {
+    font-size: 34pt;
+    margin: 0 0 6mm 0;
+    line-height: 1.15;
+    color: var(--fg);
+  }
+  .cover .subtitle {
+    font-size: 13pt;
+    color: var(--muted);
+    margin-bottom: 18mm;
+  }
+  .cover .meta {
+    font-size: 10pt;
+    color: var(--muted);
+    border-top: 1px solid var(--rule);
+    padding-top: 6mm;
+  }
+  nav.toc {
+    page-break-after: always;
+    padding: 0 4mm;
+  }
+  nav.toc h2 {
+    font-size: 18pt;
+    margin: 0 0 6mm 0;
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 2mm;
+  }
+  nav.toc ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+  }
+  nav.toc ul ul {
+    padding-left: 6mm;
+    margin: 1mm 0 2mm 0;
+  }
+  nav.toc li.toc-l2 {
+    margin: 2mm 0 1mm 0;
+    font-weight: 600;
+  }
+  nav.toc li.toc-l3 {
+    font-weight: 400;
+    color: var(--muted);
+  }
+  nav.toc a {
+    color: var(--fg);
+    text-decoration: none;
+  }
+  nav.toc li.toc-l3 a { color: var(--muted); }
+  main {
+    padding: 0 4mm;
+  }
+  h1, h2, h3, h4 {
+    color: var(--fg);
+    line-height: 1.25;
+    margin-top: 8mm;
+    margin-bottom: 3mm;
+    page-break-after: avoid;
+  }
+  h2 {
+    font-size: 18pt;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 2mm;
+  }
+  h3 { font-size: 13pt; }
+  h4 { font-size: 11pt; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+  p { margin: 0 0 3mm 0; }
+  a { color: var(--accent); }
+  ul, ol { margin: 0 0 3mm 0; padding-left: 6mm; }
+  li { margin: 1mm 0; }
+  code {
+    font-family: "JetBrains Mono", Consolas, "Courier New", monospace;
+    background: var(--code-bg);
+    padding: 0.5mm 1.5mm;
+    border-radius: 1mm;
+    font-size: 9.5pt;
+  }
+  pre {
+    background: var(--code-bg);
+    padding: 3mm 4mm;
+    border-radius: 2mm;
+    overflow-x: auto;
+    page-break-inside: avoid;
+    font-size: 9.5pt;
+  }
+  pre code { background: transparent; padding: 0; }
+  blockquote {
+    margin: 0 0 3mm 0;
+    padding: 2mm 4mm;
+    border-left: 3px solid var(--accent);
+    background: #f6f8fb;
+    color: var(--muted);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 0 4mm 0;
+    page-break-inside: avoid;
+    font-size: 10pt;
+  }
+  th, td {
+    border: 1px solid var(--rule);
+    padding: 2mm 3mm;
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: var(--code-bg); }
+  img {
+    max-width: 100%;
+    height: auto;
+    page-break-inside: avoid;
+    border: 1px solid var(--rule);
+    border-radius: 2mm;
+  }
+  .img-placeholder {
+    display: block;
+    background: var(--placeholder-bg);
+    color: var(--placeholder-fg);
+    border: 1px dashed #b8bec7;
+    border-radius: 2mm;
+    text-align: center;
+    padding: 14mm 4mm;
+    font-size: 10pt;
+    font-style: italic;
+    margin: 0 0 3mm 0;
+  }
+  hr { border: 0; border-top: 1px solid var(--rule); margin: 6mm 0; }
+</style>
+</head>
+<body>
+<section class="cover">
+  <h1>{{TITLE}}</h1>
+  <div class="subtitle">Project documentation</div>
+  <div class="meta">Generated {{DATE}}</div>
+</section>
+
+{{TOC}}
+
+<main>
+{{BODY}}
+</main>
+</body>
+</html>

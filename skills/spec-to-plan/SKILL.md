@@ -7,6 +7,10 @@ description: Reads an existing spec.md and produces docs/ultra-dev/<slug>/plan.m
 
 Turn a written spec into an executable plan. Input: `docs/ultra-dev/<slug>/spec.md`. Output: `docs/ultra-dev/<slug>/plan.md`.
 
+## Prompting
+
+Fixed-choice prompts in this skill (slug pick, chain prompt) MUST use the `AskUserQuestion` tool so the user picks with arrow keys. `Other` covers free-text (e.g. `changes: ...`).
+
 ## Triggers
 
 - Chained from `spec-writing` after the user answers `yes` to "ready to write plan?".
@@ -18,14 +22,10 @@ Turn a written spec into an executable plan. Input: `docs/ultra-dev/<slug>/spec.
 ### 1. Resolve slug
 
 - If chained from `spec-writing`: the slug is already in scope. Use it.
-- Else: list directories under `docs/ultra-dev/*/` and prompt the user to pick one. Example:
-  ```
-  Existing features:
-    1. user-auth
-    2. payment-flow
-    3. core-skill-flow
-  Pick a slug (number or name):
-  ```
+- Else: list directories under `docs/ultra-dev/*/` and ask via `AskUserQuestion`:
+  - Question: `Pick a feature directory.`
+  - Header: `Feature`
+  - Options: one per existing slug (label = slug). If more than 4 exist, show the 3 most-recently-modified; user can type a slug via `Other`.
 - Slug rule (for reference, do not regenerate here): kebab-case, max 4 words, lowercase, with collision suffix `-2`, `-3`, ... assigned by `brainstorm`.
 
 ### 2. Require spec
@@ -92,17 +92,17 @@ Fix issues inline. Do not defer.
 
 ### 5. Chain prompt
 
-After self-review passes, ask the user verbatim:
+After self-review passes, ask via `AskUserQuestion`:
 
-```
-Plan written at docs/ultra-dev/<slug>/plan.md. Ready to execute? (yes / no / changes: ...)
-```
+- Question: `Plan written at docs/ultra-dev/<slug>/plan.md. Ready to execute?`
+- Header: `Execute`
+- Options: `Yes — execute`, `No — stop`, `Request changes` (description: `Provide change notes via Other`).
 
 Behavior:
 
-- `yes` — invoke `executing-plan` via the Skill tool.
-- `no` — stop. Artifact remains on disk.
-- `changes: <text>` — apply the requested revisions to `plan.md`, re-run step 4 (self-review), then re-ask.
+- `Yes` — invoke `executing-plan` via the Skill tool.
+- `No` — stop. Artifact remains on disk.
+- `Other` / change notes — apply the requested revisions to `plan.md`, re-run step 4 (self-review), then re-ask.
 
 ## Checklist
 

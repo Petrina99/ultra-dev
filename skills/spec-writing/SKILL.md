@@ -7,6 +7,10 @@ description: Produces `docs/ultra-dev/<slug>/spec.md` from a brainstorming conve
 
 Convert a brainstorming conversation (or equivalent context already in the session) into a single `spec.md` artifact under `docs/ultra-dev/<slug>/`. One feature per run. No code, no implementation detail.
 
+## Prompting
+
+Every fixed-choice prompt in this skill (slug pick, chain prompt) MUST be issued via the `AskUserQuestion` tool so the user picks with arrow keys. `Other` covers free-text (e.g. `changes: ...`). Plain-text prompts only when the answer is genuinely free-form.
+
 ## Triggers
 
 - Auto-trigger: **none**. This skill is silent on generic feature/change/UI/build prompts.
@@ -21,14 +25,10 @@ If neither condition holds, do not run.
 ### 1. Resolve slug
 
 - **Chained from brainstorm:** the slug is already in scope. `brainstorm` created `docs/ultra-dev/<slug>/`. Reuse it. Do not re-derive.
-- **Standalone invocation:** list directories matching `docs/ultra-dev/*/` and prompt the user to pick one:
-
-  ```text
-  Pick a feature directory:
-    1. <slug-a>
-    2. <slug-b>
-    ...
-  ```
+- **Standalone invocation:** list directories matching `docs/ultra-dev/*/` and ask via `AskUserQuestion`:
+  - Question: `Pick a feature directory.`
+  - Header: `Feature`
+  - Options: one per existing slug (label = slug). Up to 4 directly; if more, show the 3 most-recently-modified and let `Other` accept a free-form slug name.
 
   If `docs/ultra-dev/` contains no feature directories, stop with:
 
@@ -75,13 +75,13 @@ Fix issues inline by editing the file. Do not produce a separate review report.
 
 ### 4. Chain prompt
 
-After self-review, ask the user verbatim:
+After self-review, ask via `AskUserQuestion`:
 
-```text
-Spec written at `docs/ultra-dev/<slug>/spec.md`. Ready to write plan? (`yes` / `no` / `changes: ...`)
-```
+- Question: `Spec written at docs/ultra-dev/<slug>/spec.md. Ready to write plan?`
+- Header: `Write plan`
+- Options: `Yes — write plan`, `No — stop`, `Request changes` (description: `Provide change notes via Other`).
 
-If the spec still has bullets under `## Open questions`, append a one-line warning before the prompt:
+If the spec still has bullets under `## Open questions`, print a one-line warning before the question:
 
 ```text
 Note: open questions remain — these block the plan stage until resolved.
@@ -89,9 +89,9 @@ Note: open questions remain — these block the plan stage until resolved.
 
 Handle the response:
 
-- `yes` → invoke `spec-to-plan` via the Skill tool. Pass the slug in scope. Stop this skill.
-- `no` → stop. Leave `spec.md` on disk untouched.
-- `changes: <description>` → revise `spec.md` per the description, re-run the self-review pass, re-ask the chain prompt.
+- `Yes` → invoke `spec-to-plan` via the Skill tool. Pass the slug in scope. Stop this skill.
+- `No` → stop. Leave `spec.md` on disk untouched.
+- `Other` / change notes → revise `spec.md` per the description, re-run the self-review pass, re-ask the chain prompt.
 
 ## Checklist
 

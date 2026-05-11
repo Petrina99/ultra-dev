@@ -7,6 +7,10 @@ description: Reviews the current branch diff against the base branch, lists issu
 
 Standalone code review skill. Diffs the current branch against its base, reports issues by severity, applies trivial auto-fixes, and leaves everything else for the user.
 
+## Prompting
+
+Fixed-choice prompts (base-branch fallback pick) MUST be issued via the `AskUserQuestion` tool so the user picks with arrow keys.
+
 ## Triggers
 
 Auto-fires on user prompts containing review keywords:
@@ -44,7 +48,7 @@ Fallback order:
 
 1. `main` if `git show-ref --verify --quiet refs/heads/main` succeeds.
 2. `master` if `main` is absent.
-3. If neither exists, ask the user: `which branch should I diff against?` Stop until answered.
+3. If neither exists, ask via `AskUserQuestion` (question = `Which branch should I diff against?`, header = `Base branch`, options = up to 3 most-recently-active local branches plus `Other` for free-form). Stop until answered.
 
 ### 2. Compute diff
 

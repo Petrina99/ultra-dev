@@ -16,7 +16,8 @@ Auto-fire on prompts that mention: feature, change, build, component, functional
 - No code. No file scaffolding. No spec.md. No plan.md.
 - Do not invoke any other skill until the user types `yes` at the final prompt.
 - Every brainstorm produces a design, even for "trivial" requests. The design may be three sentences; it must still be presented and approved.
-- One question at a time. Multiple choice preferred (a/b/c) so the user can answer in one keystroke.
+- One question at a time. Multiple choice preferred so the user can answer with one keystroke.
+- **Prompting**: every fixed-choice prompt in this skill (yes/no, a/b/c approach pick, approve/changes, hand-off yes/no/changes) MUST be issued via the `AskUserQuestion` tool so the user picks with arrow keys. Use `Other` for free-text (e.g. `changes: ...`). Only fall back to plain-text prompts when the answer is genuinely free-form (slug name override, long descriptions).
 
 ## Process
 
@@ -35,11 +36,11 @@ Do not summarise the repo back to the user unless asked. Use the context to ask 
 
 ### 1b. Offer research
 
-Before clarifying questions, ask the user verbatim:
+Before clarifying questions, ask via `AskUserQuestion`:
 
-```
-Research libraries / frameworks / services for this topic first? (yes / no)
-```
+- Question: `Research libraries / frameworks / services for this topic first?`
+- Header: `Research`
+- Options: `Yes`, `No`
 
 - `no` → continue to step 2.
 - `yes`:
@@ -55,13 +56,7 @@ Skip this step entirely if the user already triggered `research` earlier in the 
 
 Loop:
 
-1. Ask the single most load-bearing open question. Format:
-   ```
-   Q: <question>
-     a) <option>
-     b) <option>
-     c) <option>  (or "other: ...")
-   ```
+1. Ask the single most load-bearing open question via `AskUserQuestion`. Provide 2-4 distinct options as labelled choices; the tool auto-adds `Other` for free-text answers. Give each option a one-line `description` so trade-offs are visible.
 2. Wait for the answer.
 3. Pick the next question based on the answer.
 
@@ -75,15 +70,15 @@ Present approaches side by side. For each:
 - **Sketch** — 2–4 sentences.
 - **Trade-offs** — pros, cons, risk, mitigation.
 
-End with a recommendation and one-sentence rationale. Ask the user to pick or steer.
+End with a recommendation and one-sentence rationale. Then ask via `AskUserQuestion`: question = `Which approach?`, header = `Approach`, options = one per proposed approach (label = name, description = one-line trade-off). `Other` lets the user steer free-form.
 
 ### 4. Present design in sections, approve per section
 
 Break the chosen approach into sections scaled to complexity (typical: Goal, Scope in/out, Key decisions, Architecture sketch, Open questions). For each section:
 
 1. Present the section.
-2. Ask: `Approve <section>? (yes / changes: ...)`
-3. On `changes: ...` revise that section and re-ask. Do not advance until the user approves.
+2. Ask via `AskUserQuestion`: question = `Approve <section>?`, header = `Approve`, options = `Approve`, `Request changes` (description: `Provide change notes via Other`). User selects `Other` to type `changes: ...` free-form.
+3. On a change request, revise that section and re-ask. Do not advance until the user approves.
 
 Keep sections short. Do not pad.
 
@@ -108,17 +103,17 @@ Create `docs/ultra-dev/<slug>/` as an empty directory. Do not write any files in
 
 ### 7. Hand-off prompt
 
-End the skill with this exact prompt:
+End the skill via `AskUserQuestion`:
 
-```
-Brainstorm complete. Ready to write spec? (yes / no / changes: ...)
-```
+- Question: `Brainstorm complete. Ready to write spec?`
+- Header: `Write spec`
+- Options: `Yes — write spec`, `No — stop here`, `Request changes` (description: `Provide notes via Other`).
 
 Then:
 
-- On `yes` — invoke `spec-writing` via the Skill tool. Pass the slug and approved design as context.
-- On `no` — stop. Leave the empty `docs/ultra-dev/<slug>/` in place. The conversation context remains the source of truth; if the user re-invokes `spec-writing` later in the same session it can read from there.
-- On `changes: ...` — revise the design (loop back to step 4 for the affected sections), then re-ask the hand-off prompt.
+- On `Yes` — invoke `spec-writing` via the Skill tool. Pass the slug and approved design as context.
+- On `No` — stop. Leave the empty `docs/ultra-dev/<slug>/` in place. The conversation context remains the source of truth; if the user re-invokes `spec-writing` later in the same session it can read from there.
+- On `Other` / change notes — revise the design (loop back to step 4 for the affected sections), then re-ask the hand-off prompt.
 
 ## Checklist
 

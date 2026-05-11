@@ -7,6 +7,10 @@ description: Researches libraries, frameworks, services, APIs, and SDKs for an u
 
 Produce a terse, version-pinned research document for an upcoming feature. One run = one `docs/ultra-dev/<slug>/research.md`. No code, no implementation work — just the shortlist of tools the implementer needs, with the links to keep going.
 
+## Prompting
+
+Fixed-choice prompts (slug pick, overwrite/append, hand-off) MUST be issued via the `AskUserQuestion` tool. Free-form prompts (research target list) stay plain text.
+
 ## Triggers
 
 - Auto-trigger: **none**. Silent on generic feature/change/build prompts.
@@ -38,16 +42,9 @@ Do not fall back to web search or guess from training data — the whole point i
 ### 1. Resolve target slug
 
 - **Chained from brainstorm:** slug already in scope. Reuse it.
-- **Standalone invocation:** list directories matching `docs/ultra-dev/*/` and prompt the user to pick one:
+- **Standalone invocation:** list directories matching `docs/ultra-dev/*/` and ask via `AskUserQuestion` (question = `Pick a feature directory.`, header = `Feature`, options = one per existing slug, up to 4 directly; if more, show the 3 most-recently-modified plus `Other` for free-form slug input).
 
-  ```text
-  Pick a feature directory:
-    1. <slug-a>
-    2. <slug-b>
-    ...
-  ```
-
-  If `docs/ultra-dev/` is empty, ask the user for a slug, then create `docs/ultra-dev/<slug>/`.
+  If `docs/ultra-dev/` is empty, ask the user (plain text) for a slug, then create `docs/ultra-dev/<slug>/`.
 
 ### 2. Gather research targets
 
@@ -125,24 +122,27 @@ Keep it under ~10 lines. The file holds the detail.
 
 If chained from `brainstorm`, return control to brainstorm — it owns the next step. Do not invoke other skills.
 
-If standalone, end with:
+If standalone, end via `AskUserQuestion`:
 
-```
-Research complete. Continue with brainstorm / spec-writing? (yes / no)
-```
+- Question: `Research complete. Continue with brainstorm or spec-writing?`
+- Header: `Next step`
+- Options: `Brainstorm`, `Spec-writing`, `Stop here`.
 
-- `yes` → invoke `brainstorm` (if no slug had a spec yet) or `spec-writing` (if spec-writing makes more sense given session context). Pick the one that fits; if unsure, ask the user.
-- `no` → stop.
+Behavior:
+
+- `Brainstorm` → invoke `brainstorm`.
+- `Spec-writing` → invoke `spec-writing`.
+- `Stop here` → stop.
 
 ## Conventions
 
-- One `research.md` per feature directory. Re-running the skill **overwrites** the file after confirming with the user:
+- One `research.md` per feature directory. Re-running the skill **overwrites** the file after confirming via `AskUserQuestion`:
 
-  ```
-  research.md already exists for <slug>. Overwrite? (yes / no / append)
-  ```
+  - Question: `research.md already exists for <slug>. Overwrite, append, or cancel?`
+  - Header: `Overwrite?`
+  - Options: `Overwrite`, `Append`, `Cancel`.
 
-  On `append`: add new `## <Item>` blocks; do not duplicate existing ones; update the "Recommendations at a glance" table.
+  On `Append`: add new `## <Item>` blocks; do not duplicate existing ones; update the "Recommendations at a glance" table.
 - Never paste full doc pages into the file. Link to them.
 - Never write API keys or auth tokens, even in examples.
 - The file is safe to commit — it holds only public docs metadata.

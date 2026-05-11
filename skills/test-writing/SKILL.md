@@ -7,6 +7,10 @@ description: Post-hoc test generator. Auto-triggers on test, tests, testing, cov
 
 Generate tests for code that already exists. POST-HOC ONLY. Never write a failing test first, never gate implementation on a test, never use red/green/refactor language. The user has explicitly chosen post-hoc testing for this plugin.
 
+## Prompting
+
+Fixed-choice prompts (framework pick when ambiguous, test-selection menu) MUST be issued via the `AskUserQuestion` tool. The selection menu uses `multiSelect = true` with one option per proposed test; `Other` accepts free-form indices for users who prefer that.
+
 ## Triggers
 
 - Auto-trigger on keywords: "add tests", "write tests", "test this", "missing tests", "coverage", "unit test", "integration test", "spec".
@@ -42,7 +46,7 @@ Scan project config files to identify the framework. Stop at the first confident
 
 Also note existing test directory layout (`tests/`, `test/`, `__tests__/`, `spec/`, `*_test.go` siblings, `*.test.ts` siblings, etc.) and the assertion style already in use. Mirror it.
 
-If detection is ambiguous, ask the user once which framework to target.
+If detection is ambiguous, ask once via `AskUserQuestion` (question = `Which test framework should I target?`, header = `Framework`, options = up to 4 detected candidates; `Other` for free-form).
 
 ### 2. Detect base branch and changed files
 
@@ -81,21 +85,20 @@ N. <test-file-path> :: <test-name> — <one-line intent>
 
 Group by source file. Keep intents action-oriented ("returns 404 when user missing", "rejects negative quantities", not "tests user lookup").
 
-End with the confirmation prompt verbatim:
+End with a confirmation prompt:
 
-```
-Reply with: all  |  none  |  comma-separated numbers (e.g. 1,3,5)
-```
+- **≤ 4 proposed tests**: use `AskUserQuestion` (multiSelect = true, header = `Tests`, question = `Which tests should I generate?`, options = one per proposed test, label = `<N>. <test-name>`, description = the intent line). Empty selection = generate none.
+- **> 4 proposed tests**: print the numbered list to chat, then use `AskUserQuestion` (header = `Tests`, question = `Which tests should I generate?`, options = `All`, `None`, `Pick by number` → `Other` lets the user type comma/space-separated indices like `1,3,5`).
 
 ### 5. Wait for confirmation
 
-Do not generate anything until the user replies. Accepted replies:
+Do not generate anything until the user replies. Map the answer:
 
-- `all` — generate every proposed test.
-- `none` — abort, generate nothing, exit cleanly.
-- Comma- or space-separated indices (e.g. `1,3,5` or `2 4`) — generate only those.
+- `All` (or every option ticked in the multiSelect form) — generate every proposed test.
+- `None` (or empty multiSelect) — abort, generate nothing, exit cleanly.
+- `Pick by number` / `Other` with indices (e.g. `1,3,5` or `2 4`) — generate only those.
 
-Anything else: re-ask once with the same prompt.
+If `Other` is empty or unparseable, re-ask once with the same prompt.
 
 ### 6. Generate selected tests
 

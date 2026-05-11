@@ -7,6 +7,10 @@ description: Generate documentation artifacts (changelog, README, inline code do
 
 Post-hoc documentation generator. Runs against recent changes on the current branch and produces only the artifacts the user explicitly selects.
 
+## Prompting
+
+Fixed-choice prompts (artifact menu, changelog-create confirm, README edit confirm) MUST be issued via the `AskUserQuestion` tool so the user picks with arrow keys. The artifact menu uses `multiSelect = true`.
+
 ## When this skill runs
 
 - Auto-triggers on keywords: `docs`, `documentation`, `changelog`, `readme`, `docstring`, `jsdoc`, `update changelog`, `write docs`.
@@ -35,25 +39,18 @@ Never require ultra-dev artifacts. Their absence must not block the skill.
 
 ## Artifact menu
 
-After context resolution and change detection, render this menu verbatim:
+After context resolution and change detection, ask via `AskUserQuestion`:
 
-```
-Which docs to generate?
-  [c] CHANGELOG entry
-  [r] README updates (install/usage/feature sections)
-  [i] Inline code docs (docstrings/JSDoc on new public API)
-  [n] notes.md entry under docs/ultra-dev/<slug>/ (if applicable)
-  [all] / [none]
-```
+- Question: `Which docs to generate?`
+- Header: `Docs`
+- multiSelect: `true`
+- Options:
+  - `CHANGELOG entry`
+  - `README updates` — install/usage/feature sections
+  - `Inline code docs` — docstrings/JSDoc on new public API
+  - `notes.md entry` — under `docs/ultra-dev/<slug>/` (omit this option if no slug resolved; tell the user once why it was dropped)
 
-Parse user input as:
-
-- A single letter: `c`, `r`, `i`, `n`.
-- A comma list: `c,r`, `r,i,n`, etc.
-- `all` selects every applicable artifact. If no `<slug>` was resolved, drop `n` from the `all` set and tell the user why.
-- `none` exits the skill without writing anything.
-
-Reject unknown letters and re-prompt. Never assume — ask if input is ambiguous.
+Empty selection = exit without writing. The user may also type free-form via `Other` if they want something not listed.
 
 ## Per-artifact generation rules
 
@@ -66,7 +63,7 @@ Generate only items the user selected. Do not touch unselected artifacts.
    - Determine the appropriate version/date section (top `Unreleased` block if Keep-a-Changelog style, else a new dated section at the top).
    - Append the entry summarizing the change set, grouped by Added / Changed / Fixed / Removed when style fits.
    - Match the file's existing formatting conventions (heading depth, bullet style, date format).
-3. If none exists, ask the user: "No changelog file found. Create `CHANGELOG.md` (Keep-a-Changelog format)? (yes/no)". Create only on `yes`.
+3. If none exists, ask via `AskUserQuestion` (question = `No changelog file found. Create CHANGELOG.md (Keep-a-Changelog format)?`, header = `Changelog`, options = `Yes — create it`, `No — skip`). Create only on `Yes`.
 
 ### [r] README updates
 

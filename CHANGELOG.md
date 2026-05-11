@@ -2,6 +2,12 @@
 
 All notable changes to `ultra-dev-plugin` are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [SemVer](https://semver.org/).
 
+## [1.6.1] — 2026-05-11
+
+### Changed
+
+- All skills (`brainstorm`, `spec-writing`, `spec-to-plan`, `executing-plan`, `research`, `code-review`, `test-writing`, `doc-writing`, `erd-writing`) now route fixed-choice prompts through the harness `AskUserQuestion` tool, so users pick answers with arrow keys instead of typing. Free-form prompts (branch names, connection strings, change notes) stay plain text; `Other` covers edge cases.
+
 ## [1.6.0] — 2026-05-11
 
 ### Added

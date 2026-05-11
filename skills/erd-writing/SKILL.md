@@ -7,6 +7,10 @@ description: Generates an entity-relationship diagram (ERD) from a live database
 
 Run the bundled `erd.mjs` (next to this SKILL.md) to introspect a relational database and drop a rendered ERD into `docs/ultra-dev/<slug>/`.
 
+## Prompting
+
+Fixed-choice prompts (confirm intent, engine pick, non-local host confirm, install driver confirm, slug pick) MUST be issued via the `AskUserQuestion` tool so the user picks with arrow keys. Free-form prompts (connection string, schema name, output dir) stay plain text.
+
 ## Bundle layout
 
 Resolved via `${CLAUDE_SKILL_DIR}` (set by Claude Code at invocation time):
@@ -36,28 +40,20 @@ Also runs:
 
 ### 1. Confirm intent
 
-Render verbatim:
+Ask via `AskUserQuestion` (question = `Generate ERD for the current schema?`, header = `ERD`, options = `Yes — continue`, `No — stop`).
 
-```
-Generate ERD for the current schema? (yes / no)
-```
-
-- `no` → stop. Do not import drivers, do not prompt further.
-- `yes` → continue.
+- `No` → stop. Do not import drivers, do not prompt further.
+- `Yes` → continue.
 
 ### 2. Resolve target slug
 
 - Chained from `executing-plan`: slug already in scope.
-- Standalone: list `docs/ultra-dev/*/` and prompt for a pick.
-- If no slug applies, ask for an output directory path.
+- Standalone: list `docs/ultra-dev/*/` and ask via `AskUserQuestion` (question = `Pick a feature directory.`, header = `Feature`, options = one per existing slug; up to 4 directly, else 3 most-recently-modified plus `Other` for free-form).
+- If no slug applies, ask (plain text) for an output directory path.
 
 ### 3. Gather connection info
 
-Ask:
-
-```
-DB engine? (postgres / sqlite / sqlserver)
-```
+Ask via `AskUserQuestion` (question = `DB engine?`, header = `Engine`, options = `postgres`, `sqlite`, `sqlserver`).
 
 Then, by engine:
 
@@ -65,13 +61,9 @@ Then, by engine:
 - `sqlite`    → ask for the `.db` / `.sqlite` file path. Skip the schema question.
 - `sqlserver` → ask for the connection string (mention `TrustServerCertificate=true` is often needed locally). Ask for schema name (default: `dbo`).
 
-If the host in the connection string is not `localhost` / `127.0.0.1` / `::1`, render a single second confirmation:
+If the host in the connection string is not `localhost` / `127.0.0.1` / `::1`, ask once via `AskUserQuestion` (question = `Host <hostname> is not local. Connect anyway?`, header = `Non-local host`, options = `No — stop`, `Yes — connect`).
 
-```
-Host <hostname> is not local. Connect anyway? (yes / no)
-```
-
-Stop on `no`.
+Stop on `No`.
 
 ### 4. Run the script
 
@@ -87,14 +79,10 @@ Title default: `<Feature title> — DB ERD` if a `spec.md` exists for the slug a
 
 The script exits with code `2` and prints `Missing dependency. Run: npm install <pkg>` if the engine driver is not installed.
 
-When that happens, surface the message verbatim and ask:
+When that happens, surface the message verbatim and ask via `AskUserQuestion` (question = `Driver missing. Install <pkg> now?`, header = `Install driver`, options = `Yes — install`, `No — stop`).
 
-```
-Driver missing. Install <pkg> now? (yes / no)
-```
-
-- `yes` → run `npm install <pkg>`. Re-run the script.
-- `no` → stop. Leave nothing on disk.
+- `Yes` → run `npm install <pkg>`. Re-run the script.
+- `No` → stop. Leave nothing on disk.
 
 ### 6. Confirm artifacts
 

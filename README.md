@@ -8,7 +8,7 @@
 
 Brainstorm → Spec → Plan → Execute. The human drives every hand-off.
 
-[![Version](https://img.shields.io/badge/version-1.5.1-blue.svg)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-1.6.0-blue.svg)](.claude-plugin/plugin.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-8A2BE2.svg)](https://docs.claude.com/en/docs/claude-code)
 [![Inspired by superpowers](https://img.shields.io/badge/inspired%20by-superpowers-orange.svg)](https://github.com/obra/superpowers)
 
@@ -16,7 +16,7 @@ Brainstorm → Spec → Plan → Execute. The human drives every hand-off.
 
 ## Overview
 
-`ultra-dev-plugin` chains four core skills — **brainstorm**, **spec-writing**, **spec-to-plan**, **executing-plan** — into a single deliberate workflow. Five optional aux skills — **research**, **code-review**, **test-writing**, **doc-writing**, **erd-writing** — run on demand.
+`ultra-dev-plugin` chains four core skills — **brainstorm**, **spec-writing**, **spec-to-plan**, **executing-plan** — into a single deliberate workflow. Six optional aux skills — **research**, **code-review**, **test-writing**, **doc-writing**, **erd-writing**, **project-docs** — run on demand.
 
 The `research` skill depends on the [`context7`](https://github.com/upstash/context7) MCP server for live, version-accurate library docs. **Install it yourself** before using `research` — see [Optional: context7 for `research`](#optional-context7-for-research) below.
 
@@ -31,7 +31,7 @@ Every feature lives in its own slug directory under `docs/ultra-dev/<slug>/`.
 
 ## Status
 
-**In active development.** The four core skills and five aux skills are functional, but the plugin is still evolving. APIs, prompts, and conventions may change between versions. Feedback and issues welcome.
+**In active development.** The four core skills and six aux skills are functional, but the plugin is still evolving. APIs, prompts, and conventions may change between versions. Feedback and issues welcome.
 
 ---
 
@@ -167,6 +167,7 @@ Drives batches per the plan's `## Dependencies`, dispatches parallel subagents w
 | [`test-writing`](skills/test-writing/SKILL.md) | yes | post-hoc test generation for changed files |
 | [`doc-writing`](skills/doc-writing/SKILL.md) | yes | CHANGELOG, README, inline docs, `notes.md` entries |
 | [`erd-writing`](skills/erd-writing/SKILL.md) | yes | introspect a relational DB and render an ERD (`erd.md` + `erd.html`) into the slug dir |
+| [`project-docs`](skills/project-docs/SKILL.md) | no (slash-only) | scan repo, draft user or developer guide, render to PDF with TOC + image placeholders |
 
 ### research
 
@@ -206,6 +207,20 @@ Always confirms before connecting, asks again if the host is non-local, never ec
 Hooks into `executing-plan` two ways: (1) inline prompt after a successful `db`-tagged task, (2) letter `e` in the end-of-plan aux menu.
 
 > **Triggers on:** db, database, schema, migration, ERD, diagram, table, relation, foreign key, FK.
+
+### project-docs
+
+Generates a professional **end-user guide** or **developer guide** for the current project. Scans the repo (manifest, README, framework detection, routes, CLI commands, public API surface, env-vars, build/deploy scripts), drafts Markdown from a scaffold, and renders a polished PDF via Puppeteer with a cover page, auto-built table of contents, anchored headings, working internal/external links, and image placeholders that degrade gracefully when files are missing.
+
+Output:
+
+- `docs/user-guide/user-guide.md` + `docs/user-guide/user-guide.pdf` — end-user docs.
+- `docs/dev-guide/dev-guide.md`   + `docs/dev-guide/dev-guide.pdf`   — developer docs.
+- `docs/<type>/assets/` — image folder (logo, screenshots). Auto-added to `.gitignore`; markdown + PDF are committable.
+
+First run installs `puppeteer` and `markdown-it` on confirmation.
+
+> Does **not** auto-trigger and is **not** chained from any other skill. Runs only when the user invokes `/project-docs` explicitly.
 
 ---
 
@@ -262,6 +277,13 @@ skills/
       postgres.mjs     # introspector — needs `pg`
       sqlite.mjs       # introspector — needs `better-sqlite3`
       sqlserver.mjs    # introspector — needs `mssql`
+  project-docs/
+    SKILL.md
+    generate-pdf.mjs   # md → HTML → PDF via Puppeteer + markdown-it
+    template.html      # cover + TOC + print CSS shell
+    templates/
+      user-guide.md    # end-user scaffold
+      dev-guide.md     # developer scaffold
 templates/
   spec.md              # skeleton dropped by spec-writing
   plan.md              # skeleton dropped by spec-to-plan

@@ -49,6 +49,7 @@ After context resolution and change detection, ask via `AskUserQuestion`:
   - `README updates` — install/usage/feature sections
   - `Inline code docs` — docstrings/JSDoc on new public API
   - `notes.md entry` — under `docs/ultra-dev/<slug>/` (omit this option if no slug resolved; tell the user once why it was dropped)
+  - `Word document (.docx)` — styled Word summary of the change set, rendered via pandoc
 
 Empty selection = exit without writing. The user may also type free-form via `Other` if they want something not listed.
 
@@ -90,6 +91,30 @@ Generate only items the user selected. Do not touch unselected artifacts.
    ```
 
 3. Do not overwrite earlier entries (failure logs, prior shipped notes). Append only.
+
+### [w] Word document (.docx)
+
+1. Verify pandoc is available: `pandoc --version`. If missing, tell the user (`Install pandoc: https://pandoc.org/installing.html`) and skip this artifact.
+2. Resolve the reference template at `skills/doc-writing/reference.docx`. If absent, bootstrap once:
+   ```
+   pandoc -o skills/doc-writing/reference.docx --print-default-data-file reference.docx
+   ```
+   Tell the user the template was created and can be customized (fonts, heading colors, margins) by editing it in Word.
+3. Build a Markdown source covering the change set:
+   - `# <Repo or slug> — Change Summary` title
+   - Date line (today's date, ISO format)
+   - `## Overview` — one paragraph from spec.md if slug exists, else from commit log
+   - `## Changes` — bulleted list grouped by Added / Changed / Fixed / Removed, sourced from `git log <base>..HEAD --oneline` + diff filenames
+   - `## Files Touched` — table of path + change type
+   - `## Notes` — optional caveats, follow-ups (skip if empty)
+4. Write the Markdown to a temp file, then render:
+   ```
+   pandoc <tmp.md> --reference-doc=skills/doc-writing/reference.docx --toc -o <output>.docx
+   ```
+   Output path:
+   - If slug resolved: `docs/ultra-dev/<slug>/summary.docx`
+   - Else: `docs/<repo-name>-summary-<YYYY-MM-DD>.docx` (create `docs/` if missing)
+5. Delete the temp Markdown after success. Report the final `.docx` path.
 
 ## Constraints
 

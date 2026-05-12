@@ -1,7 +1,7 @@
 {
   "name": "ultra-dev-plugin",
   "description": "A controlled feature-development workflow for Claude Code. Chains four core skills (brainstorm, spec-writing, spec-to-plan, executing-plan) with the human driving every transition, plus aux skills (research, code-review, test-writing, doc-writing, erd-writing) that run on demand. The project-docs skill is slash-only (`/project-docs`) and never auto-triggers. The research skill expects the user-installed context7 MCP plugin to be available.",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "author": {
     "name": "Petrina99"
   }

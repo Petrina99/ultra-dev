@@ -43,6 +43,7 @@ Every feature lives in its own slug directory under `docs/ultra-dev/<slug>/`.
 - [Core skills](#core-skills)
 - [Aux skills](#aux-skills)
 - [Usage](#usage)
+- [Recommended CLAUDE.md guidance](#recommended-claudemd-guidance)
 - [Conventions](#conventions)
 - [Layout](#layout)
 - [Roadmap](#roadmap)
@@ -241,6 +242,30 @@ Plan written at docs/ultra-dev/<slug>/plan.md. Ready to execute? (yes / no / cha
 ```
 
 Aux skills (`code-review`, `test-writing`, `doc-writing`) run from the end-of-plan menu in `executing-plan`, or independently any time their triggers fire.
+
+---
+
+## Recommended CLAUDE.md guidance
+
+Paste this block into your project's `CLAUDE.md` (or `~/.claude/CLAUDE.md` for global) so Claude knows when to route work through the plugin instead of jumping straight to code:
+
+```markdown
+## Workflow routing
+
+For big changes or new features, drive the work through the **ultra-dev plugin**
+(`brainstorm` → `spec-writing` → `spec-to-plan` → `executing-plan`). The plugin
+produces `docs/ultra-dev/<slug>/spec.md` and `plan.md` and runs the
+implementation loop.
+
+For small fixes, tweaks, and one-liners, just implement directly.
+```
+
+Rule of thumb:
+
+- **Plugin route** — anything that needs design discussion, touches multiple files, adds a new feature, changes behavior users will notice, or you'd want to review before merging.
+- **Direct route** — typo fixes, one-liners, single-function tweaks, mechanical renames, formatting, obvious bug fixes with one clear cause.
+
+If unsure, lean on the plugin — the upfront `brainstorm` is cheap and the spec/plan double as a PR description.
 
 ---
 

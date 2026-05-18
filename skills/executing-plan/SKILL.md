@@ -50,9 +50,10 @@ Plan loaded: docs/ultra-dev/<slug>/plan.md
 Defaults:
   branch        = <new|current>  # smart: force `new` if current is main/master; else `current`
   worktree      = no
-  subagents     = yes (where deps allow)
+  subagents     = no             # safer default — parallel subagents cause type/rename drift; opt in only for leaf-pure batches
   commits       = per-task
-  commit-format = simple
+  commit-format = numbered       # `T<N> - <type> - <name>` so bisect maps commit -> plan task
+  review-cadence = per-batch     # run `code-review` between batches to catch drift early
 ```
 
 Then ask via `AskUserQuestion`:
@@ -63,15 +64,16 @@ Then ask via `AskUserQuestion`:
 
 On `Accept all defaults` → use defaults as-is.
 
-On `Customize` → issue 5 sequential `AskUserQuestion` calls, one per setting. Skip a setting if its current value already matches the only sensible choice. Use these option sets exactly:
+On `Customize` → issue 6 sequential `AskUserQuestion` calls, one per setting. Skip a setting if its current value already matches the only sensible choice. Use these option sets exactly:
 
 | Setting | Header | Options |
 |---|---|---|
 | branch | `Branch` | `new`, `current` |
 | worktree | `Worktree` | `no`, `yes` |
-| subagents | `Subagents` | `yes`, `no` |
+| subagents | `Subagents` | `no`, `yes` |
 | commits | `Commits` | `per-task`, `per-batch`, `single` |
-| commit-format | `Commit fmt` | `simple`, `numbered` |
+| commit-format | `Commit fmt` | `numbered`, `simple` |
+| review-cadence | `Review` | `per-batch`, `per-task`, `end-only` |
 
 After collecting overrides, echo the final config back to the user before step 4.
 
@@ -90,20 +92,59 @@ After collecting overrides, echo the final config back to the user before step 4
 
 Parse the `## Dependencies` section of `plan.md` to derive batches. Each line such as `Parallel batch A: 1, 2, 3` defines one batch; serial entries (single task or `needs: <prev>` chains) become size-1 batches.
 
+Before the loop, read `## Interfaces` end-to-end and keep it in working memory. Every task — main loop or subagent — must use those exact names and signatures verbatim. Do not rename.
+
 For each batch in order:
 
-1. **Batch size > 1 AND `subagents=yes`:** dispatch via the `superpowers:subagent-driven-development` skill. One subagent per task. Pass each subagent its full task text from the plan plus scene-setting context (slug, spec link, plan link, branch, worktree path). Subagents run parallel-safe.
+1. **Batch size > 1 AND `subagents=yes`:** dispatch via the `superpowers:subagent-driven-development` skill. One subagent per task. Use the subagent prompt template below — do NOT pass only the task line. Subagents run parallel-safe.
 2. **Batch size = 1 OR `subagents=no`:** execute every task in the batch serially in the main loop. Do not spawn parallel subagents yourself when `subagents=no`.
 
-**After each task completes successfully:**
+#### Subagent prompt template (mandatory when `subagents=yes`)
 
-- **Mark the task done in `plan.md`:** prepend `[x] ` immediately after the task number on the matching line under `## Tasks`. Example: `3. [feat] add login form — needs: 1` becomes `3. [x] [feat] add login form — needs: 1`. Edit the file in place; do not rewrite untouched lines. If `commits=per-task`, include this edit in the task's commit.
+Each subagent must receive, verbatim:
+
+```
+Task <N> from docs/ultra-dev/<slug>/plan.md:
+  <full task line, including tags + needs + verify>
+
+Spec: docs/ultra-dev/<slug>/spec.md
+Plan: docs/ultra-dev/<slug>/plan.md
+Branch: <branch-name>
+Worktree: <path-or-"same as repo">
+
+Required before writing code:
+  1. Read the spec and plan in full.
+  2. Read the `## Interfaces` section. Use those symbol names and signatures VERBATIM. Do not rename, re-type, or re-shape.
+  3. Read every file you intend to modify. Read every file that defines a symbol you will call.
+  4. If a dependency from `needs:` produced a file or symbol, read it before writing yours.
+
+Required after writing code:
+  5. Run the task's `verify:` command. It must exit 0.
+  6. If it exits non-zero, fix and re-run. Report failure only after 3 attempts.
+  7. Do not mark the task done if verify fails.
+
+Out of scope:
+  - Renaming symbols listed in `## Interfaces`.
+  - Editing files owned by sibling tasks in the same batch.
+  - Adding features beyond the task's action phrase.
+```
+
+**After each task completes (subagent returns OR main-loop task finishes):**
+
+- **Run the task's `verify:` command.** Capture exit code and last 50 lines of output.
+  - Exit 0 → task verified, proceed.
+  - Non-zero → treat as task failure, enter failure handling (step 6). Do NOT mark `[x]`. Do NOT commit.
+  - `verify: manual: ...` → print the manual check to the user and ask via `AskUserQuestion` (question = `Manual verify for task <N>: <check>. Pass?`, header = `Verify`, options = `Pass`, `Fail`). On `Fail`, enter failure handling.
+- **Mark the task done in `plan.md`:** prepend `[x] ` immediately after the task number on the matching line under `## Tasks`. Example: `3. [feat] add login form — needs: 1 — verify: pnpm tsc --noEmit` becomes `3. [x] [feat] add login form — needs: 1 — verify: pnpm tsc --noEmit`. Edit the file in place; do not rewrite untouched lines. If `commits=per-task`, include this edit in the task's commit.
 - If `commits=per-task`: stage that task's changes and commit using the format spec below.
+- If `review-cadence=per-task`: invoke `code-review` via the Skill tool now, on the current diff. Apply trivial auto-fixes inline. Surface Blocker / Major findings to the user before proceeding to the next task.
 - If the task's tag list contains `db`: ask once via `AskUserQuestion` (question = `Generate / refresh ERD now? Can also run later from aux menu.`, header = `ERD now?`, options = `No — later`, `Yes — run erd-writing`). On `Yes`, invoke `erd-writing` via the Skill tool, passing the slug. On `No`, continue.
 
 **After each batch completes successfully:**
 
 - If `commits=per-batch`: stage and commit the whole batch's changes using the format spec below.
+- If `review-cadence=per-batch`: invoke `code-review` via the Skill tool on the batch diff. Apply trivial auto-fixes inline. Surface Blocker / Major findings before starting the next batch. If a Blocker is found, treat the originating task as failed and enter failure handling.
+- **Cross-batch type check:** run the repo-wide typecheck / build command (best guess: `pnpm tsc --noEmit` / `npm run build` / `cargo check` / `pytest -q` — match the `verify:` style used across tasks). Non-zero → treat the most-recent task as failed, enter failure handling. This catches drift between parallel subagents that individually pass their per-task verify but break together.
 
 **After all batches complete successfully:**
 
@@ -128,31 +169,32 @@ Body: optional, only when the "why" isn't obvious from subject + diff.
 
 ### 6. Failure handling
 
-On task failure (test failure, compile error, runtime error, anything that prevents the task from being marked done):
+Failure = the task's `verify:` command exited non-zero, OR `code-review` raised a Blocker on the task's diff, OR a manual verify was marked Fail, OR compile/test/runtime error during the work. Anything that means the produced code is not known-good.
 
-1. **Debug step:** read the error output, locate the likely cause (file, line, symbol), attempt a fix.
-2. **Retry the task:** re-run the same step from the top.
+1. **Debug step:** read the error output, locate the likely cause (file, line, symbol), attempt a fix. Re-read `## Interfaces` — most batch failures are rename / signature drift.
+2. **Retry the task:** re-run the task and its `verify:` command from the top.
 3. **Up to 3 attempts total** (initial run + 2 retries, or any equivalent count to 3).
 4. **On the 3rd failure:** stop the plan. Append an entry to `docs/ultra-dev/<slug>/notes.md` under the `## Failure log` section (create the file from `templates/notes.md` if missing):
 
 ```
 ## <ISO timestamp> — Task <N> failed
 Error: <one-line excerpt>
+Verify cmd: <task's verify: command>
 Retries: 3
 Resolution: stopped — user intervention required
 ```
 
 5. Ask via `AskUserQuestion`:
 
-- Question: `Task <N> failed after 3 attempts. How do you want to proceed?`
+- Question: `Task <N> failed verify after 3 attempts. How do you want to proceed?`
 - Header: `Failure`
-- Options: `Skip task — continue`, `Retry with help`, `Abort plan`.
+- Options: `Retry with help` (description: `Provide hints via Other; runs one more attempt`), `Revert task & abort` (description: `git restore the task's changes, stop the plan`), `Abort plan — keep changes` (description: `stop plan; leave partial work on disk for manual inspection`).
 
-Honour the choice. On `Abort plan`, stop the run loop entirely. Do not reset state.
+Honour the choice. On `Revert task & abort` or `Abort plan — keep changes`, stop the run loop entirely. Do not reset state. **There is no `Skip task — continue` option** — silently moving past unverified code is the dominant source of bugs the executor used to ship. If you genuinely want to skip, abort and manually mark the task `[x]` in `plan.md` before re-invoking the skill.
 
 ### 7. End-of-plan aux menu
 
-After all batches complete (or after the user picks `Skip task` for the last failing task and the loop drains), ask via `AskUserQuestion` (multiSelect = true):
+After all batches complete (verify-clean), ask via `AskUserQuestion` (multiSelect = true):
 
 - Question: `Plan executed. Run aux skills?`
 - Header: `Aux skills`
@@ -180,18 +222,22 @@ If `worktree=no`, skip this step entirely.
 - [ ] Did not auto-trigger.
 - [ ] Slug resolved (chain context or directory list).
 - [ ] `plan.md` exists; refused if absent.
-- [ ] Rendered the entry prompt with smart defaults.
-- [ ] Parsed `ok` or `key=value` overrides.
+- [ ] `## Interfaces` read into working memory before any task runs.
+- [ ] Rendered the entry prompt with smart defaults (including `review-cadence`).
+- [ ] Parsed overrides.
 - [ ] Branch handled (refused `current` on main/master; created new otherwise).
 - [ ] Worktree created if requested.
 - [ ] Baseline `HEAD` recorded.
 - [ ] Batches derived from `## Dependencies`.
-- [ ] Subagents dispatched only for size>1 batches when `subagents=yes`.
+- [ ] Subagents dispatched only for size>1 batches when `subagents=yes`, using the mandatory subagent prompt template.
 - [ ] Serial fallback when `subagents=no` (no self-spawned parallelism).
+- [ ] Per-task `verify:` command executed; non-zero exit triggered failure handling, no `[x]`, no commit.
+- [ ] `review-cadence=per-task` → `code-review` run between tasks; `per-batch` → between batches; Blockers escalated.
+- [ ] Cross-batch typecheck / build run after each batch when applicable.
 - [ ] Commits granularity matches user choice.
-- [ ] Commit subject matches `commit-format` spec; no `Co-Authored-By` / Claude attribution trailers.
-- [ ] Each completed task marked `[x]` in `plan.md`.
-- [ ] Failures retried up to 3, logged to `notes.md`, escalated.
+- [ ] Commit subject matches `commit-format` spec (default `numbered`); no `Co-Authored-By` / Claude attribution trailers.
+- [ ] Each verified task marked `[x]` in `plan.md`.
+- [ ] Failures retried up to 3, logged to `notes.md`, escalated via Retry / Revert+Abort / Abort menu (no Skip option).
 - [ ] Aux menu rendered after the run; selected skills dispatched in sequence.
 - [ ] Worktree merge/PR/skip step rendered when `worktree=yes`; worktree removed only on `[m]` or `[p]`.
 
@@ -200,8 +246,11 @@ If `worktree=no`, skip this step entirely.
 - Do not auto-trigger.
 - Do not skip the entry prompt, even if defaults look obvious.
 - Do not spawn parallel subagents yourself when `subagents=no`.
-- Do not invoke `code-review`, `test-writing`, or `doc-writing` mid-run; they belong to the end-of-plan aux menu only. (`erd-writing` may run mid-run, but only via the explicit prompt after a `db`-tagged task.)
+- Do not mark a task `[x]` or commit it before its `verify:` command exits 0 (or its manual verify passes).
+- Do not rename or re-shape any symbol listed in `## Interfaces` — including in subagents.
+- Do not invoke `test-writing` or `doc-writing` mid-run; they belong to the end-of-plan aux menu only. (`erd-writing` may run mid-run via the `db`-tag prompt; `code-review` runs mid-run only via the `review-cadence` setting.)
 - Do not reference `commands/` or slash commands.
 - Do not validate task tags.
-- Do not remove the worktree on `[s]`.
+- Do not remove the worktree on `Skip`.
 - Do not add `Co-Authored-By`, `Generated with Claude Code`, or any other attribution trailer to commits made by this skill.
+- Do not offer a `Skip task — continue` option on failure. Skipping unverified code is what we are fixing.

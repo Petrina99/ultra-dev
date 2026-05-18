@@ -41,36 +41,54 @@ Fixed-choice prompts in this skill (slug pick, chain prompt) MUST use the `AskUs
 
 Read `spec.md` end-to-end. Map every acceptance-criteria item to at least one task.
 
-Copy the skeleton from `templates/plan.md` (repo root) into `docs/ultra-dev/<slug>/plan.md`, then replace `<Feature title>` and the example task / dependency / verification lines with the real content. Strip the HTML comment block after filling. Sections, in this exact order — same as the template:
+Copy the skeleton from `templates/plan.md` (repo root) into `docs/ultra-dev/<slug>/plan.md`, then replace `<Feature title>` and the example task / dependency / interface / verification lines with the real content. Strip the HTML comment block after filling. Sections, in this exact order — same as the template:
 
 1. `# Plan: <Feature title>` header + `Spec: ./spec.md` link
 2. `## Tasks`
 3. `## Dependencies`
-4. `## Verification`
+4. `## Interfaces`
+5. `## Verification`
 
-If `templates/plan.md` is missing, fall back to writing the same four sections inline.
+If `templates/plan.md` is missing, fall back to writing the same five sections inline.
 
 #### Task format (exact)
 
 ```
-N. [tag(s)] action — needs: X,Y
+N. [tag(s)] action — needs: X,Y — verify: <command>
 ```
 
 - `N` is a 1-based integer.
 - `[tag(s)]` is one or more open tags in brackets, comma-separated. Example tags: `frontend`, `backend`, `db`, `infra`, `third-party`, `test`, `docs`, `config`, `skill`. Tags are open — do not validate or restrict the taxonomy.
 - `action` is an imperative phrase describing the task.
 - `needs: —` when the task has no dependency. Otherwise `needs: 1,3` listing prerequisite task numbers.
-- The dash separator before `needs:` is the em-dash `—`, not a hyphen.
+- `verify:` is REQUIRED. Concrete shell command (`pnpm tsc --noEmit`, `pytest tests/foo.py`, `npm run lint -- src/foo.ts`, `cargo check -p foo`, etc.). Must exit non-zero on failure. If no automatable check exists, write `verify: manual: <one-line check>` — but prefer an automatable check whenever possible.
+- The dash separator before `needs:` and before `verify:` is the em-dash `—`, not a hyphen.
+- **Scope cap:** each task should describe ≤ ~150 LOC of expected change. If a task implies more, split it.
 
 #### Dependencies section
 
 State explicit batches so `executing-plan` can dispatch parallel work without re-parsing intent. Use plain language:
 
-- "Parallel batch A: tasks N, M (no shared files)"
+- "Parallel batch A: tasks N, M (no shared files AND no shared types/interfaces)"
 - "Sequential after A: task K"
-- "Parallel batch B after A: tasks P, Q (no shared files)"
+- "Parallel batch B after A: tasks P, Q (no shared files AND no shared types/interfaces)"
 
-A task belongs to a parallel batch only if it shares no edited files with other batch members. Otherwise serialize.
+A task belongs to a parallel batch only if **all** hold:
+- shares no edited files with other batch members, AND
+- shares no produced symbols (functions, types, schemas, routes) with other batch members — i.e. neither task creates or renames a symbol the other consumes.
+
+Otherwise serialize. When in doubt, serialize — parallel drift is the #1 source of bugs in executed plans.
+
+#### Interfaces section
+
+List every cross-task symbol with its exact final name and signature: functions, types, classes, DB columns, routes, env vars, CLI flags. Tasks downstream must use these names verbatim — this is the contract that prevents rename drift between subagents.
+
+Example:
+- `validateInput(input: string): Result` — created in task 2, used by tasks 4, 7
+- `users.created_at timestamptz NOT NULL` — created in task 1, queried in task 5
+- `GET /api/foo` returns `{ id, name }` — created in task 3, consumed in task 6
+
+If a symbol is purely internal to one task, omit it.
 
 #### Verification section
 
@@ -82,10 +100,13 @@ After writing the plan, walk the file and check:
 
 - [ ] Every acceptance criterion in `spec.md` is covered by at least one task.
 - [ ] No placeholders (`<TODO>`, `<fill in>`, `XXX`, `...`) remain.
-- [ ] Type and name consistency: if task 5 references `validateInput()`, task 3 must be the one that creates it under that exact name.
+- [ ] Type and name consistency: if task 5 references `validateInput()`, task 3 must be the one that creates it under that exact name, and `## Interfaces` must list `validateInput` with its exact signature.
+- [ ] Every cross-task symbol appears in `## Interfaces` with exact name + signature.
 - [ ] Every `needs:` reference points to an existing earlier task number.
 - [ ] Every task has at least one tag.
-- [ ] `Dependencies` section accounts for every task.
+- [ ] Every task has a `verify:` command (automatable preferred, `manual:` only as fallback).
+- [ ] No task implies > ~150 LOC of change. Split if so.
+- [ ] `Dependencies` section accounts for every task; parallel batches share no files AND no produced symbols.
 - [ ] `Verification` section has at least one concrete check per acceptance-criteria cluster.
 
 Fix issues inline. Do not defer.
@@ -109,8 +130,9 @@ Behavior:
 - [ ] Slug resolved (chain context or directory pick).
 - [ ] `docs/ultra-dev/<slug>/spec.md` confirmed present.
 - [ ] `plan.md` written with header `# Plan: <title>` and `Spec: ./spec.md` link.
-- [ ] `## Tasks` populated, every task in `N. [tags] action — needs: X,Y` form.
-- [ ] `## Dependencies` lists explicit batches.
+- [ ] `## Tasks` populated, every task in `N. [tags] action — needs: X,Y — verify: <command>` form.
+- [ ] `## Dependencies` lists explicit batches; parallel batches share no files AND no produced symbols.
+- [ ] `## Interfaces` declares every cross-task symbol with exact name + signature.
 - [ ] `## Verification` is a checkbox list of concrete checks.
 - [ ] Self-review pass clean.
 - [ ] Chain prompt asked.

@@ -196,7 +196,7 @@ Honour the choice. On `Revert task & abort` or `Abort plan — keep changes`, st
 
 After the run completes (verify-clean, before aux menu), make sure `docs/ultra-dev/<slug>/smoke-tests.html` reflects the plan's current `## Smoke Tests` section:
 
-- If the file is missing, OR `plan.md` was modified during the run (e.g. tasks edited smoke steps), regenerate it. Procedure is identical to step 3b of `spec-to-plan`: read `templates/smoke-tests.html`, parse `## Smoke Tests` scenarios into JSON, substitute `__FEATURE_TITLE__`, `__SLUG__`, `__SCENARIOS_JSON__` (escape `</` as `<\/` inside the JSON), write to `docs/ultra-dev/<slug>/smoke-tests.html`.
+- If the file is missing, OR `plan.md` was modified during the run (e.g. tasks edited smoke steps), regenerate it. Procedure is identical to step 3b of `spec-to-plan`: read `${CLAUDE_PLUGIN_ROOT}/templates/smoke-tests.html`, parse `## Smoke Tests` scenarios into JSON, substitute `__FEATURE_TITLE__`, `__SLUG__`, `__SCENARIOS_JSON__` (escape `</` as `<\/` inside the JSON), write to `docs/ultra-dev/<slug>/smoke-tests.html`.
 - If the template is missing, warn once and skip — never fail the run for this.
 - Print the path in the end-of-plan summary so the developer can open it: `Smoke tests tracker: docs/ultra-dev/<slug>/smoke-tests.html (open in browser).`
 

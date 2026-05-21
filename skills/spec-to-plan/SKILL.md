@@ -114,7 +114,7 @@ After `plan.md` is written, also write `docs/ultra-dev/<slug>/smoke-tests.html` 
 
 Procedure:
 
-1. Read `templates/smoke-tests.html` from repo root.
+1. Read `${CLAUDE_PLUGIN_ROOT}/templates/smoke-tests.html` (plugin install dir, exposed by Claude Code).
 2. Parse your own `## Smoke Tests` section. For each `### N. <title>` scenario extract:
    - `title` — heading text (drop the leading `N. `)
    - `goal` — text after `**Goal:**`, single line, trimmed
@@ -132,7 +132,7 @@ Procedure:
    - `__SCENARIOS_JSON__` → the JSON array stringified. The placeholder sits inside a `<script type="application/json">` block, so embed JSON directly — but escape `</` as `<\/` to avoid breaking the script tag.
 5. Write the result to `docs/ultra-dev/<slug>/smoke-tests.html`.
 
-If `templates/smoke-tests.html` is missing, skip this step (do not fail the skill) and warn the user once: `smoke-tests.html template not found — tracker page not generated`.
+If `${CLAUDE_PLUGIN_ROOT}/templates/smoke-tests.html` is missing, skip this step (do not fail the skill) and warn the user once: `smoke-tests.html template not found — tracker page not generated`.
 
 ### 4. Self-review
 

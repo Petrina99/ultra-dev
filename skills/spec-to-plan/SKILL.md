@@ -48,6 +48,7 @@ Copy the skeleton from `templates/plan.md` (repo root) into `docs/ultra-dev/<slu
 3. `## Dependencies`
 4. `## Interfaces`
 5. `## Verification`
+6. `## Smoke Tests`
 
 If `templates/plan.md` is missing, fall back to writing the same five sections inline.
 
@@ -94,6 +95,45 @@ If a symbol is purely internal to one task, omit it.
 
 Checkbox list. Each item is a concrete way to confirm the plan is done — smoke test command, file existence check, manual inspection, or end-to-end scenario. No vague "looks good" entries.
 
+#### Smoke Tests section (REQUIRED)
+
+Manual smoke tests written for the developer to run by hand after the plan executes. Always present — never omit, never write "N/A". At least one scenario; usually 2–5 covering the golden path and the obvious failure modes the feature is built to handle.
+
+Each scenario has:
+
+- `### N. <Short scenario title>` heading
+- `**Goal:**` — one line, what the test proves
+- `**Steps:**` — numbered list, concrete actions. Real inputs, real button labels, real routes / commands / URLs. No "verify it works" hand-waving.
+- `**Expected:**` — observable result. Text on screen, HTTP status, log line, row in table, file on disk. Something a human can see and confirm.
+
+Keep steps short (typically 3–7 per scenario). If a scenario needs > ~10 steps, split it. Smoke tests are for fast manual confidence, not full QA suites.
+
+### 3b. Generate smoke-tests.html tracker
+
+After `plan.md` is written, also write `docs/ultra-dev/<slug>/smoke-tests.html` — a static, self-contained tracker page the developer opens in a browser to walk through smoke tests with checkboxes (state persists in `localStorage`).
+
+Procedure:
+
+1. Read `templates/smoke-tests.html` from repo root.
+2. Parse your own `## Smoke Tests` section. For each `### N. <title>` scenario extract:
+   - `title` — heading text (drop the leading `N. `)
+   - `goal` — text after `**Goal:**`, single line, trimmed
+   - `steps` — ordered list items under `**Steps:**`, each as a plain string (markdown stripped to text)
+   - `expected` — text after `**Expected:**`, single line or short paragraph
+3. Build a JSON array, e.g.:
+   ```json
+   [
+     {"title": "Login with valid credentials", "goal": "Auth happy path", "steps": ["Open /login", "Enter user@test / hunter2", "Click Sign in"], "expected": "Redirected to /dashboard with welcome banner"}
+   ]
+   ```
+4. Substitute placeholders in the template (literal text, no regex weirdness):
+   - `__FEATURE_TITLE__` → the feature title from the `# Plan: <title>` header
+   - `__SLUG__` → the slug
+   - `__SCENARIOS_JSON__` → the JSON array stringified. The placeholder sits inside a `<script type="application/json">` block, so embed JSON directly — but escape `</` as `<\/` to avoid breaking the script tag.
+5. Write the result to `docs/ultra-dev/<slug>/smoke-tests.html`.
+
+If `templates/smoke-tests.html` is missing, skip this step (do not fail the skill) and warn the user once: `smoke-tests.html template not found — tracker page not generated`.
+
 ### 4. Self-review
 
 After writing the plan, walk the file and check:
@@ -108,6 +148,7 @@ After writing the plan, walk the file and check:
 - [ ] No task implies > ~150 LOC of change. Split if so.
 - [ ] `Dependencies` section accounts for every task; parallel batches share no files AND no produced symbols.
 - [ ] `Verification` section has at least one concrete check per acceptance-criteria cluster.
+- [ ] `Smoke Tests` section present with ≥ 1 scenario; each scenario has Goal, numbered Steps, Expected. No "verify it works" hand-waving.
 
 Fix issues inline. Do not defer.
 
@@ -115,7 +156,7 @@ Fix issues inline. Do not defer.
 
 After self-review passes, ask via `AskUserQuestion`:
 
-- Question: `Plan written at docs/ultra-dev/<slug>/plan.md. Ready to execute?`
+- Question: `Plan written at docs/ultra-dev/<slug>/plan.md (tracker: smoke-tests.html). Ready to execute?`
 - Header: `Execute`
 - Options: `Yes — execute`, `No — stop`, `Request changes` (description: `Provide change notes via Other`).
 
@@ -123,7 +164,7 @@ Behavior:
 
 - `Yes` — invoke `executing-plan` via the Skill tool.
 - `No` — stop. Artifact remains on disk.
-- `Other` / change notes — apply the requested revisions to `plan.md`, re-run step 4 (self-review), then re-ask.
+- `Other` / change notes — apply the requested revisions to `plan.md`, re-run step 3b (regenerate `smoke-tests.html` if smoke section changed) and step 4 (self-review), then re-ask.
 
 ## Checklist
 
@@ -134,6 +175,8 @@ Behavior:
 - [ ] `## Dependencies` lists explicit batches; parallel batches share no files AND no produced symbols.
 - [ ] `## Interfaces` declares every cross-task symbol with exact name + signature.
 - [ ] `## Verification` is a checkbox list of concrete checks.
+- [ ] `## Smoke Tests` present with ≥ 1 scenario (Goal + numbered Steps + Expected).
+- [ ] `smoke-tests.html` generated alongside `plan.md` (or warning printed if template missing).
 - [ ] Self-review pass clean.
 - [ ] Chain prompt asked.
 
@@ -142,6 +185,6 @@ Behavior:
 - Per-feature directory: `docs/ultra-dev/<slug>/`.
 - Slug: kebab-case, max 4 words, lowercase, collision suffix `-2`, `-3`, ... (set by `brainstorm`, not regenerated here).
 - Plan file path: `docs/ultra-dev/<slug>/plan.md`.
-- Plan template sections, in order: header + spec link, `## Tasks`, `## Dependencies`, `## Verification`. No extra top-level sections.
+- Plan template sections, in order: header + spec link, `## Tasks`, `## Dependencies`, `## Interfaces`, `## Verification`, `## Smoke Tests`. No extra top-level sections.
 - Task format: `N. [tag(s)] action — needs: X,Y` (em-dash, `needs: —` for none).
 - Tags: open taxonomy, never validated.

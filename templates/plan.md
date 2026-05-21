@@ -39,3 +39,32 @@ Declare every cross-task symbol (function, class, type, route, table, env var) h
 - [ ] <smoke test or command>
 - [ ] <manual check>
 - [ ] <command output to inspect>
+
+## Smoke Tests
+
+<!--
+Manual smoke tests for developers. Each test = title + numbered steps + expected result.
+Cover the golden path AND the obvious failure modes the feature must handle.
+Be specific: real inputs, real URLs/routes, real button labels. No "verify it works" vibes.
+-->
+
+### 1. <Short scenario title>
+
+**Goal:** <what this test proves>
+
+**Steps:**
+1. <action — concrete: click X, enter Y, run Z>
+2. <action>
+3. <action>
+
+**Expected:** <observable result — text on screen, status code, log line, file written>
+
+### 2. <Next scenario title>
+
+**Goal:** <...>
+
+**Steps:**
+1. <...>
+2. <...>
+
+**Expected:** <...>

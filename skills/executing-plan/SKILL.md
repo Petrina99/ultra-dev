@@ -192,6 +192,14 @@ Resolution: stopped — user intervention required
 
 Honour the choice. On `Revert task & abort` or `Abort plan — keep changes`, stop the run loop entirely. Do not reset state. **There is no `Skip task — continue` option** — silently moving past unverified code is the dominant source of bugs the executor used to ship. If you genuinely want to skip, abort and manually mark the task `[x]` in `plan.md` before re-invoking the skill.
 
+### 6b. Refresh smoke-tests.html tracker
+
+After the run completes (verify-clean, before aux menu), make sure `docs/ultra-dev/<slug>/smoke-tests.html` reflects the plan's current `## Smoke Tests` section:
+
+- If the file is missing, OR `plan.md` was modified during the run (e.g. tasks edited smoke steps), regenerate it. Procedure is identical to step 3b of `spec-to-plan`: read `templates/smoke-tests.html`, parse `## Smoke Tests` scenarios into JSON, substitute `__FEATURE_TITLE__`, `__SLUG__`, `__SCENARIOS_JSON__` (escape `</` as `<\/` inside the JSON), write to `docs/ultra-dev/<slug>/smoke-tests.html`.
+- If the template is missing, warn once and skip — never fail the run for this.
+- Print the path in the end-of-plan summary so the developer can open it: `Smoke tests tracker: docs/ultra-dev/<slug>/smoke-tests.html (open in browser).`
+
 ### 7. End-of-plan aux menu
 
 After all batches complete (verify-clean), ask via `AskUserQuestion` (multiSelect = true):
@@ -238,6 +246,7 @@ If `worktree=no`, skip this step entirely.
 - [ ] Commit subject matches `commit-format` spec (default `numbered`); no `Co-Authored-By` / Claude attribution trailers.
 - [ ] Each verified task marked `[x]` in `plan.md`.
 - [ ] Failures retried up to 3, logged to `notes.md`, escalated via Retry / Revert+Abort / Abort menu (no Skip option).
+- [ ] `smoke-tests.html` tracker refreshed (or warning printed if template missing) and path included in end-of-plan summary.
 - [ ] Aux menu rendered after the run; selected skills dispatched in sequence.
 - [ ] Worktree merge/PR/skip step rendered when `worktree=yes`; worktree removed only on `[m]` or `[p]`.
 

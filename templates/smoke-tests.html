@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Smoke Tests — __FEATURE_TITLE__</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #161a22;
+    --panel-2: #1d222c;
+    --border: #262c38;
+    --text: #e7ecf3;
+    --muted: #8a93a4;
+    --accent: #7c9cff;
+    --accent-2: #5b7bff;
+    --ok: #5dd39e;
+    --warn: #f6c177;
+    --danger: #ef6f6c;
+    --shadow: 0 4px 20px rgba(0,0,0,0.35);
+    --radius: 12px;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f6f7fb;
+      --panel: #ffffff;
+      --panel-2: #f0f2f8;
+      --border: #e2e6ef;
+      --text: #1a1d23;
+      --muted: #5b6373;
+      --accent: #3b5bdb;
+      --accent-2: #2f4ac2;
+      --ok: #2f9e6f;
+      --shadow: 0 4px 16px rgba(20,30,60,0.08);
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px; line-height: 1.5; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 24px 20px 80px; }
+  header { position: sticky; top: 0; backdrop-filter: blur(8px);
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    border-bottom: 1px solid var(--border); padding: 14px 0; margin-bottom: 24px; z-index: 10; }
+  .h-inner { max-width: 860px; margin: 0 auto; padding: 0 20px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  h1 { font-size: 18px; margin: 0; font-weight: 600; letter-spacing: -0.01em; }
+  .slug { color: var(--muted); font-size: 13px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .progress-wrap { flex: 1; min-width: 180px; }
+  .progress { height: 6px; background: var(--panel-2); border-radius: 999px; overflow: hidden; border: 1px solid var(--border); }
+  .progress > div { height: 100%; background: linear-gradient(90deg, var(--accent), var(--ok)); transition: width 200ms ease; width: 0%; }
+  .progress-label { font-size: 12px; color: var(--muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .actions { display: flex; gap: 8px; }
+  button { font: inherit; color: var(--text); background: var(--panel-2); border: 1px solid var(--border);
+    padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: background 120ms, border-color 120ms; }
+  button:hover { background: var(--panel); border-color: var(--accent); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: white; }
+  button.primary:hover { background: var(--accent-2); }
+
+  .scenario { background: var(--panel); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px 18px 56px; margin-bottom: 16px; box-shadow: var(--shadow); position: relative; }
+  .scenario.done { border-color: color-mix(in srgb, var(--ok) 45%, var(--border));
+    background: color-mix(in srgb, var(--ok) 6%, var(--panel)); }
+  .scenario.done .s-title { text-decoration: line-through; color: var(--muted); }
+  .s-check { position: absolute; left: 18px; top: 20px; width: 24px; height: 24px;
+    border-radius: 6px; border: 1.5px solid var(--muted); cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--panel-2); transition: background 120ms, border-color 120ms, transform 80ms; }
+  .s-check:hover { border-color: var(--accent); }
+  .s-check:active { transform: scale(0.92); }
+  .scenario.done .s-check { background: var(--ok); border-color: var(--ok); }
+  .scenario.done .s-check::after { content: "✓"; color: white; font-size: 15px; line-height: 1; font-weight: 700; }
+  .s-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+  .s-title { font-size: 16px; font-weight: 600; margin: 0; }
+  .s-index { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 13px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .s-goal { color: var(--muted); margin: 0 0 12px; font-size: 14px; }
+  .s-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--muted); margin: 12px 0 6px; font-weight: 600; }
+  ol.steps { padding-left: 22px; margin: 0 0 8px; }
+  ol.steps li { padding: 4px 0; }
+  .expected { background: var(--panel-2); border-left: 3px solid var(--accent);
+    padding: 10px 14px; border-radius: 8px; margin-top: 8px; font-size: 14px; }
+  .expected code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+  .empty { color: var(--muted); text-align: center; padding: 60px 20px; }
+  footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 32px; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<header>
+  <div class="h-inner">
+    <div>
+      <h1>__FEATURE_TITLE__</h1>
+      <div class="slug">__SLUG__</div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress"><div id="bar"></div></div>
+      <div class="progress-label" id="prog">0 / 0 tests</div>
+    </div>
+    <div class="actions">
+      <button id="reset" title="Clear all checks for this feature">Reset</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="root"></div>
+  <footer>
+    State stored locally in your browser (localStorage). Each developer tracks their own runs.
+  </footer>
+</main>
+
+<script id="data" type="application/json">__SCENARIOS_JSON__</script>
+<script>
+(() => {
+  const slug = "__SLUG__";
+  const scenarios = JSON.parse(document.getElementById("data").textContent);
+  const root = document.getElementById("root");
+  const bar = document.getElementById("bar");
+  const prog = document.getElementById("prog");
+  const storeKey = `smoke-tests:${slug}`;
+  const state = JSON.parse(localStorage.getItem(storeKey) || "{}");
+
+  function save() { localStorage.setItem(storeKey, JSON.stringify(state)); }
+  function isDone(si) { return !!state[si]; }
+  function setDone(si, v) { state[si] = v; save(); }
+
+  function render() {
+    if (!scenarios.length) {
+      root.innerHTML = '<div class="empty">No smoke tests defined in plan.md yet.</div>';
+      updateProgress();
+      return;
+    }
+    root.innerHTML = scenarios.map((s, si) => {
+      const done = isDone(si);
+      return `
+        <section class="scenario${done ? ' done' : ''}" data-si="${si}">
+          <div class="s-check" role="checkbox" aria-checked="${done}" tabindex="0" title="Mark test as done"></div>
+          <div class="s-head">
+            <h2 class="s-title">${escapeHtml(s.title)}</h2>
+            <span class="s-index">#${si + 1}</span>
+          </div>
+          ${s.goal ? `<p class="s-goal">${escapeHtml(s.goal)}</p>` : ''}
+          <div class="s-label">Steps</div>
+          <ol class="steps">
+            ${s.steps.map(step => `<li>${escapeHtml(step)}</li>`).join('')}
+          </ol>
+          ${s.expected ? `
+            <div class="s-label">Expected</div>
+            <div class="expected">${escapeHtml(s.expected)}</div>
+          ` : ''}
+        </section>
+      `;
+    }).join('');
+    bindClicks();
+    updateProgress();
+  }
+
+  function toggle(si) {
+    const next = !isDone(si);
+    setDone(si, next);
+    const sec = root.querySelector(`.scenario[data-si="${si}"]`);
+    sec.classList.toggle('done', next);
+    sec.querySelector('.s-check').setAttribute('aria-checked', String(next));
+    updateProgress();
+  }
+
+  function bindClicks() {
+    root.querySelectorAll('.s-check').forEach(box => {
+      box.addEventListener('click', e => {
+        e.stopPropagation();
+        toggle(+box.closest('.scenario').dataset.si);
+      });
+      box.addEventListener('keydown', e => {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          toggle(+box.closest('.scenario').dataset.si);
+        }
+      });
+    });
+  }
+
+  function updateProgress() {
+    const total = scenarios.length;
+    const done = scenarios.reduce((n, _, si) => n + (isDone(si) ? 1 : 0), 0);
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    bar.style.width = pct + '%';
+    prog.textContent = `${done} / ${total} tests  ·  ${pct}%`;
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[c]);
+  }
+
+  document.getElementById('reset').addEventListener('click', () => {
+    if (!confirm('Clear all checks for this feature?')) return;
+    Object.keys(state).forEach(k => delete state[k]);
+    save();
+    render();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

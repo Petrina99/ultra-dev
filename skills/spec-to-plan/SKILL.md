@@ -129,7 +129,7 @@ Procedure:
 4. Substitute placeholders in the template (literal text, no regex weirdness):
    - `__FEATURE_TITLE__` → the feature title from the `# Plan: <title>` header
    - `__SLUG__` → the slug
-   - `__SCENARIOS_JSON__` → the JSON array stringified. The placeholder sits inside a `<script type="application/json">` block, so embed JSON directly — but escape `</` as `<\/` to avoid breaking the script tag.
+   - `__SCENARIOS_JSON__` → the JSON array stringified. The placeholder sits inside a `<script type="application/json">` block, so embed JSON directly. **Only** escape occurrences of the literal 2-char sequence `</` that appear **inside JSON string values** (rewrite as `<\/`). Do NOT alter any character outside the `__SCENARIOS_JSON__` placeholder — the surrounding `</script>` closing tag MUST remain literal, otherwise the browser never closes the data block and nothing renders.
 5. Write the result to `docs/ultra-dev/<slug>/smoke-tests.html`.
 
 If `${CLAUDE_PLUGIN_ROOT}/templates/smoke-tests.html` is missing, skip this step (do not fail the skill) and warn the user once: `smoke-tests.html template not found — tracker page not generated`.

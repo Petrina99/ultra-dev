@@ -151,6 +151,8 @@ commits       = per-task|per-batch|single
 commit-format = simple|numbered    # `feat - name` vs `T3 - feat - name`
 ```
 
+The entry prompt offers `Accept all defaults`, `Defaults, stay on current branch` (all defaults with `branch=current`), or `Customize`.
+
 Commits never include `Co-Authored-By` or `Generated with Claude Code` trailers.
 
 Drives batches per the plan's `## Dependencies`, dispatches parallel subagents when batch size > 1 and `subagents=yes`, retries failed tasks up to 3 times, logs failures to `notes.md`, and ends with an aux-skill menu.

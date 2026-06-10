@@ -2,6 +2,12 @@
 
 All notable changes to `ultra-dev-plugin` are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [SemVer](https://semver.org/).
 
+## [1.8.3] — 2026-06-10
+
+### Added
+
+- `executing-plan`: entry prompt now offers a third option, `Defaults, stay on current branch` — all defaults with `branch=current`, skipping the customize flow. The main/master refusal in setup still applies.
+
 ## [1.6.1] — 2026-05-11
 
 ### Changed

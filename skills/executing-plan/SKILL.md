@@ -60,9 +60,11 @@ Then ask via `AskUserQuestion`:
 
 - Question: `Accept defaults?`
 - Header: `Run config`
-- Options: `Accept all defaults`, `Customize`.
+- Options: `Accept all defaults`, `Defaults, stay on current branch` (description: `All defaults, but branch = current — no new branch`), `Customize`.
 
 On `Accept all defaults` → use defaults as-is.
+
+On `Defaults, stay on current branch` → use defaults with `branch=current`. The step-4 main/master refusal still applies: if the current branch is `main` or `master`, warn and force `branch=new`.
 
 On `Customize` → issue 6 sequential `AskUserQuestion` calls, one per setting. Skip a setting if its current value already matches the only sensible choice. Use these option sets exactly:
 
@@ -231,7 +233,7 @@ If `worktree=no`, skip this step entirely.
 - [ ] Slug resolved (chain context or directory list).
 - [ ] `plan.md` exists; refused if absent.
 - [ ] `## Interfaces` read into working memory before any task runs.
-- [ ] Rendered the entry prompt with smart defaults (including `review-cadence`).
+- [ ] Rendered the entry prompt with smart defaults (including `review-cadence`) and the `Defaults, stay on current branch` shortcut.
 - [ ] Parsed overrides.
 - [ ] Branch handled (refused `current` on main/master; created new otherwise).
 - [ ] Worktree created if requested.

@@ -2,6 +2,13 @@
 
 All notable changes to `ultra-dev-plugin` are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [SemVer](https://semver.org/).
 
+## [1.9.0] — 2026-07-01
+
+### Added
+
+- `user-manual-writing`: new aux skill — builds or updates a branded end-user PDF manual under `docs/user-manual/<slug>/`. Drives the running app through Playwright to capture real, numbered/annotated screenshots (bundled `annotate.ts` fixture, mandatory post-capture visual check), applies a project brand (logo, accent color, optional legal/confidentiality notice via `manual.config.json`), and optionally protects the rendered PDF (author metadata + AES-256, via bundled `protect-pdf.py`). Reuses `project-docs`'s `generate-pdf.mjs` renderer for the render step. Slash-only (`/user-manual-writing`); never auto-triggers, never chained from another skill.
+- `project-docs`: `generate-pdf.mjs` and `template.html` gained optional `--logo`, `--accent`, `--footer-note` flags (cover logo image, CSS accent color override, footer note line) — backward compatible, defaults unchanged. Added so `user-manual-writing` can reuse the same renderer instead of duplicating a Puppeteer pipeline.
+
 ## [1.8.3] — 2026-06-10
 
 ### Added

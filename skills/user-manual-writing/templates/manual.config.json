@@ -1,0 +1,15 @@
+{
+  "brand": {
+    "name": "",
+    "logoPath": "",
+    "accentColor": "#2b5fa6",
+    "legalNotice": ""
+  },
+  "app": {
+    "baseUrl": "http://localhost:3000"
+  },
+  "protect": {
+    "enabled": false,
+    "ownerPassword": ""
+  }
+}

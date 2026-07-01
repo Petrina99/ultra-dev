@@ -8,7 +8,7 @@
   :root {
     --fg: #1a1a1a;
     --muted: #5a5a5a;
-    --accent: #2b5fa6;
+    --accent: {{ACCENT}};
     --rule: #e1e4e8;
     --code-bg: #f5f6f8;
     --placeholder-bg: #eceff3;
@@ -29,6 +29,11 @@
     flex-direction: column;
     justify-content: center;
     padding: 0 8mm;
+  }
+  .cover .cover-logo {
+    max-height: 20mm;
+    max-width: 60mm;
+    margin-bottom: 8mm;
   }
   .cover h1 {
     font-size: 34pt;
@@ -161,6 +166,7 @@
 </head>
 <body>
 <section class="cover">
+  {{LOGO}}
   <h1>{{TITLE}}</h1>
   <div class="subtitle">Project documentation</div>
   <div class="meta">Generated {{DATE}}</div>

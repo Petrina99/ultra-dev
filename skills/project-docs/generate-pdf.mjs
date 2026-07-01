@@ -160,12 +160,24 @@ async function main() {
   const output = args.output;
   const title = args.title || "Documentation";
   const assets = args.assets || "assets";
+  const accent = args.accent || "#2b5fa6";
+  const footerNote = args["footer-note"] || "";
   if (!input || !output) {
-    die("Usage: generate-pdf.mjs --input <md> --output <pdf> [--title <s>] [--assets <dir>]");
+    die("Usage: generate-pdf.mjs --input <md> --output <pdf> [--title <s>] [--assets <dir>] [--logo <path>] [--accent <hex>] [--footer-note <s>]");
   }
   const inputPath = resolve(input);
   const outputPath = resolve(output);
   const assetsDir = resolve(assets);
+
+  let logoHtml = "";
+  if (args.logo) {
+    const logoPath = resolve(args.logo);
+    if (await fileExists(logoPath)) {
+      logoHtml = `<img class="cover-logo" src="${pathToFileURL(logoPath).href}" alt="Logo">`;
+    } else {
+      console.error(`Logo not found, skipping: ${logoPath}`);
+    }
+  }
 
   const md = await readFile(inputPath, "utf8").catch((e) => die(`Cannot read input: ${e.message}`));
 
@@ -181,6 +193,8 @@ async function main() {
   let template = await readFile(templatePath, "utf8");
   template = template
     .replaceAll("{{TITLE}}", escapeHtml(title))
+    .replaceAll("{{ACCENT}}", escapeHtml(accent))
+    .replace("{{LOGO}}", logoHtml)
     .replace("{{TOC}}", toc)
     .replace("{{BODY}}", body)
     .replaceAll("{{DATE}}", new Date().toISOString().slice(0, 10));
@@ -200,7 +214,7 @@ async function main() {
       displayHeaderFooter: true,
       margin: { top: "22mm", bottom: "22mm", left: "18mm", right: "18mm" },
       headerTemplate: `<div style="font-size:9px;width:100%;padding:0 14mm;color:#888;display:flex;justify-content:space-between;"><span>${escapeHtml(title)}</span><span class="date"></span></div>`,
-      footerTemplate: `<div style="font-size:9px;width:100%;padding:0 14mm;color:#888;display:flex;justify-content:space-between;"><span></span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>`,
+      footerTemplate: `<div style="font-size:9px;width:100%;padding:0 14mm;color:#888;display:flex;justify-content:space-between;"><span>${escapeHtml(footerNote)}</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>`,
     });
   } finally {
     await browser.close();

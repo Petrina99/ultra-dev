@@ -8,7 +8,7 @@
 
 Brainstorm → Spec → Plan → Execute. The human drives every hand-off.
 
-[![Version](https://img.shields.io/badge/version-1.6.0-blue.svg)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-1.9.0-blue.svg)](.claude-plugin/plugin.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-8A2BE2.svg)](https://docs.claude.com/en/docs/claude-code)
 [![Inspired by superpowers](https://img.shields.io/badge/inspired%20by-superpowers-orange.svg)](https://github.com/obra/superpowers)
 
@@ -16,7 +16,7 @@ Brainstorm → Spec → Plan → Execute. The human drives every hand-off.
 
 ## Overview
 
-`ultra-dev-plugin` chains four core skills — **brainstorm**, **spec-writing**, **spec-to-plan**, **executing-plan** — into a single deliberate workflow. Six optional aux skills — **research**, **code-review**, **test-writing**, **doc-writing**, **erd-writing**, **project-docs** — run on demand.
+`ultra-dev-plugin` chains four core skills — **brainstorm**, **spec-writing**, **spec-to-plan**, **executing-plan** — into a single deliberate workflow. Seven optional aux skills — **research**, **code-review**, **test-writing**, **doc-writing**, **erd-writing**, **project-docs**, **user-manual-writing** — run on demand.
 
 The `research` skill depends on the [`context7`](https://github.com/upstash/context7) MCP server for live, version-accurate library docs. **Install it yourself** before using `research` — see [Optional: context7 for `research`](#optional-context7-for-research) below.
 
@@ -171,6 +171,7 @@ Drives batches per the plan's `## Dependencies`, dispatches parallel subagents w
 | [`doc-writing`](skills/doc-writing/SKILL.md) | yes | CHANGELOG, README, inline docs, `notes.md` entries |
 | [`erd-writing`](skills/erd-writing/SKILL.md) | yes | introspect a relational DB and render an ERD (`erd.md` + `erd.html`) into the slug dir |
 | [`project-docs`](skills/project-docs/SKILL.md) | no (slash-only) | scan repo, draft user or developer guide, render to PDF with TOC + image placeholders |
+| [`user-manual-writing`](skills/user-manual-writing/SKILL.md) | no (slash-only) | branded end-user manual with real annotated app screenshots (Playwright) + optional AES-256 protected PDF |
 
 ### research
 
@@ -224,6 +225,19 @@ Output:
 First run installs `puppeteer` and `markdown-it` on confirmation.
 
 > Does **not** auto-trigger and is **not** chained from any other skill. Runs only when the user invokes `/project-docs` explicitly.
+
+### user-manual-writing
+
+Builds or updates a **branded end-user manual** for a live app — heavier than `project-docs`. Drives the running app through Playwright to capture real, numbered/annotated screenshots (with a mandatory visual check after capture), applies a project brand (logo, accent color, optional legal/confidentiality notice), and optionally protects the rendered PDF (author metadata + AES-256, opens without a password). Shares `project-docs`'s renderer (`generate-pdf.mjs`) via extra `--logo`/`--accent`/`--footer-note` flags.
+
+Output:
+
+- `docs/user-manual/<slug>/<slug>.md` + `docs/user-manual/<slug>/<slug>.pdf`.
+- `docs/user-manual/<slug>/assets/` — screenshots + per-manual `logo.png` (committed, not gitignored — screenshots are reproducibility artifacts, not build output).
+- `docs/user-manual/<slug>/outline.md` — internal chapter/shot-list/marker-spec, never shipped.
+- `docs/user-manual/manual.config.json` — shared brand/app/protect config across manuals in the repo.
+
+> Does **not** auto-trigger and is **not** chained from any other skill. Runs only when the user invokes `/user-manual-writing` explicitly. Optional protection step needs the user-installed `pymupdf` Python package — not bundled with this plugin.
 
 ---
 
@@ -306,11 +320,19 @@ skills/
       sqlserver.mjs    # introspector — needs `mssql`
   project-docs/
     SKILL.md
-    generate-pdf.mjs   # md → HTML → PDF via Puppeteer + markdown-it
+    generate-pdf.mjs   # md → HTML → PDF via Puppeteer + markdown-it (also used by user-manual-writing)
     template.html      # cover + TOC + print CSS shell
     templates/
       user-guide.md    # end-user scaffold
       dev-guide.md     # developer scaffold
+  user-manual-writing/
+    SKILL.md
+    protect-pdf.py     # optional PDF protection — author metadata + AES-256 (PyMuPDF)
+    templates/
+      manual.config.json  # brand/app/protect config scaffold
+      outline.md           # per-manual internal outline scaffold
+      manual.md             # prose scaffold (house style, legal-notice slot, glossary)
+      annotate.ts            # generic Playwright marker/legend screenshot helper
 templates/
   spec.md              # skeleton dropped by spec-writing
   plan.md              # skeleton dropped by spec-to-plan

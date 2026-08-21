@@ -40,7 +40,7 @@ If neither condition holds, do not run.
 
 ### 2. Write `docs/ultra-dev/<slug>/spec.md`
 
-Copy the skeleton from `templates/spec.md` (repo root) into `docs/ultra-dev/<slug>/spec.md`, then fill every `<...>` placeholder. Strip the HTML comment block after filling. Five sections, in this exact order — same as the template:
+Copy the skeleton from `${CLAUDE_PLUGIN_ROOT}/templates/spec.md` into `docs/ultra-dev/<slug>/spec.md`, then fill every `<...>` placeholder. Strip the HTML comment block after filling. Five sections, in this exact order — same as the template:
 
 1. `# <Feature title>`
 2. `## Goal`
@@ -49,7 +49,7 @@ Copy the skeleton from `templates/spec.md` (repo root) into `docs/ultra-dev/<slu
 5. `## Architecture sketch`
 6. `## Open questions`
 
-If `templates/spec.md` is missing (vendored install, pruned tree), fall back to writing the same six headings inline.
+If `${CLAUDE_PLUGIN_ROOT}/templates/spec.md` is missing (vendored install, pruned tree), fall back to writing the same six headings inline.
 
 Rules:
 

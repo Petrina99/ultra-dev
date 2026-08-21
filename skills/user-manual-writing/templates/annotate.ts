@@ -20,6 +20,14 @@ const PLACE_OFFSET: Record<NonNullable<Marker["place"]>, [number, number]> = {
   br: [1, 1],
 };
 
+type Box = { x: number; y: number; width: number; height: number };
+
+/** True when `box` is not wholly inside a `vp`-sized viewport. */
+export function isOffFrame(box: Box, vp: { width: number; height: number } | null) {
+  if (!vp) return false;
+  return box.x < 0 || box.y < 0 || box.x + box.width > vp.width || box.y + box.height > vp.height;
+}
+
 export async function shot(page: Page, outPath: string) {
   await mkdir(dirname(outPath), { recursive: true });
   await page.screenshot({ path: outPath });
@@ -37,10 +45,12 @@ export async function shotAnnotated(
   const points: { n: number; x: number; y: number }[] = [];
   const legend: string[] = [];
 
+  // These throw rather than warn on purpose: a marker on the wrong or clipped element is the one
+  // defect a passing test used to hide, and catching it here is what replaces eyeballing every PNG.
   for (const m of markers) {
     const count = await m.target.count();
     if (count !== 1) {
-      console.warn(`[annotate] marker ${m.n} ("${m.label}") resolved to ${count} elements — narrow the selector.`);
+      throw new Error(`[annotate] marker ${m.n} ("${m.label}") resolved to ${count} elements — narrow the selector.`);
     }
     const el = m.target.first();
     if (m.type === "click") await el.click();
@@ -49,8 +59,15 @@ export async function shotAnnotated(
 
     const box = await el.boundingBox();
     if (!box) {
-      console.warn(`[annotate] marker ${m.n} ("${m.label}") has no bounding box — element not visible, skipped.`);
-      continue;
+      throw new Error(`[annotate] marker ${m.n} ("${m.label}") has no bounding box — element not visible.`);
+    }
+    const vp = page.viewportSize();
+    if (isOffFrame(box, vp)) {
+      throw new Error(
+        `[annotate] marker ${m.n} ("${m.label}") is outside the ${vp!.width}x${vp!.height} viewport ` +
+          `(box ${Math.round(box.x)},${Math.round(box.y)} ${Math.round(box.width)}x${Math.round(box.height)}) — ` +
+          `raise the viewport or use type:"scroll".`,
+      );
     }
     const [ox, oy] = PLACE_OFFSET[m.place ?? "tl"];
     points.push({ n: m.n, x: box.x + box.width * ox, y: box.y + box.height * oy });
@@ -82,4 +99,17 @@ export async function shotAnnotated(
   // Clamped to the current viewport — resize the viewport before capture for below-the-fold
   // markers, restore after. See SKILL.md "Screenshots" step for the viewport/scroll gotchas.
   return { outPath, legend };
+}
+
+// ponytail: self-check for the only branchy bit here. Run with `node annotate.ts`.
+if (process.argv[1]?.endsWith("annotate.ts")) {
+  const { strict: assert } = await import("node:assert");
+  const vp = { width: 1440, height: 900 };
+  assert.equal(isOffFrame({ x: 0, y: 0, width: 1440, height: 900 }, vp), false, "exact fit is in frame");
+  assert.equal(isOffFrame({ x: 10, y: 10, width: 100, height: 50 }, vp), false, "inside is in frame");
+  assert.equal(isOffFrame({ x: -1, y: 10, width: 100, height: 50 }, vp), true, "left of origin is off frame");
+  assert.equal(isOffFrame({ x: 1400, y: 10, width: 100, height: 50 }, vp), true, "past right edge is off frame");
+  assert.equal(isOffFrame({ x: 10, y: 880, width: 100, height: 50 }, vp), true, "below fold is off frame");
+  assert.equal(isOffFrame({ x: -1, y: 10, width: 100, height: 50 }, null), false, "no viewport = no check");
+  console.log("annotate.ts self-check ok");
 }

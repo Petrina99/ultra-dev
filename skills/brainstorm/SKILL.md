@@ -16,8 +16,8 @@ Auto-fire on prompts that mention: feature, change, build, component, functional
 - No code. No file scaffolding. No spec.md. No plan.md.
 - Do not invoke any other skill until the user types `yes` at the final prompt.
 - Every brainstorm produces a design, even for "trivial" requests. The design may be three sentences; it must still be presented and approved.
-- One question at a time. Multiple choice preferred so the user can answer with one keystroke.
-- **Prompting**: every fixed-choice prompt in this skill (yes/no, a/b/c approach pick, approve/changes, hand-off yes/no/changes) MUST be issued via the `AskUserQuestion` tool so the user picks with arrow keys. Use `Other` for free-text (e.g. `changes: ...`). Only fall back to plain-text prompts when the answer is genuinely free-form (slug name override, long descriptions).
+- **Batch questions.** `AskUserQuestion` takes up to 4 questions per call — always fill the call. Never ask one question per turn; every extra call is a full round trip the user waits on. Budget for the whole skill: **≤ 4 blocking prompts** (clarifiers, approach, design approval, hand-off).
+- **Prompting**: every fixed-choice prompt in this skill (clarifiers, approach pick, approve/changes, hand-off) MUST be issued via the `AskUserQuestion` tool so the user picks with arrow keys. Use `Other` for free-text (e.g. `changes: ...`). Only fall back to plain-text prompts when the answer is genuinely free-form (slug name override, long descriptions).
 
 ## Process
 
@@ -34,33 +34,27 @@ Before asking anything, scan the project:
 
 Do not summarise the repo back to the user unless asked. Use the context to ask sharper questions.
 
-### 1b. Offer research
+### 2. Clarifying questions — batched
 
-Before clarifying questions, ask via `AskUserQuestion`:
+**One `AskUserQuestion` call, 4 questions.** Pick the 4 most load-bearing unknowns from: purpose / user, success criteria, hard constraints (perf, deps, compat), scope boundary, integration points, failure modes, and whether to research libraries first. Drop any whose answer is already obvious from step 1 — fewer than 4 is fine, more than one call is not.
+
+Each question gets 2-4 labelled options with a one-line `description` so trade-offs are visible; the tool auto-adds `Other` for free-text.
+
+A **second** call is allowed only when an answer invalidates the premise of the design (not merely to fill in detail). Hard ceiling: 2 clarifier calls.
+
+Include the research question in the first batch:
 
 - Question: `Research libraries / frameworks / services for this topic first?`
 - Header: `Research`
 - Options: `Yes`, `No`
 
-- `no` → continue to step 2.
-- `yes`:
-  1. Derive a preliminary slug from the user's initial topic using the same rule as step 5 (kebab-case, ≤4 words, collision suffix).
-  2. Create `docs/ultra-dev/<slug>/` if it does not yet exist. Show the slug on one line: `Slug: <slug>  (dir: docs/ultra-dev/<slug>/)`.
-  3. Invoke the `research` skill via the Skill tool with that slug in scope.
-  4. When `research` returns, resume at step 2. The research output (and the file at `docs/ultra-dev/<slug>/research.md`) is additional context for clarifying questions and approach proposals.
-  5. At step 5, **reuse the slug derived here** — do not re-derive. If the approved goal diverges from the initial topic, ask the user before renaming the directory.
+Skip it if the user already triggered `research` earlier in the session. On `Yes`, after the batch returns:
 
-Skip this step entirely if the user already triggered `research` earlier in the session — do not re-ask.
-
-### 2. Clarifying questions — one at a time
-
-Loop:
-
-1. Ask the single most load-bearing open question via `AskUserQuestion`. Provide 2-4 distinct options as labelled choices; the tool auto-adds `Other` for free-text answers. Give each option a one-line `description` so trade-offs are visible.
-2. Wait for the answer.
-3. Pick the next question based on the answer.
-
-Cover, in roughly this priority order: purpose / user, success criteria, hard constraints (perf, deps, compat), scope boundary, integration points, failure modes. Stop when the next question would have an obvious answer.
+1. Derive a preliminary slug from the user's initial topic using the same rule as step 5 (kebab-case, ≤4 words, collision suffix).
+2. Create `docs/ultra-dev/<slug>/` if it does not yet exist. Show the slug on one line: `Slug: <slug>  (dir: docs/ultra-dev/<slug>/)`.
+3. Invoke the `research` skill via the Skill tool with that slug in scope.
+4. When `research` returns, continue to step 3. `docs/ultra-dev/<slug>/research.md` is additional context for the approach proposals.
+5. At step 5, **reuse the slug derived here** — do not re-derive. If the approved goal diverges from the initial topic, ask the user before renaming the directory.
 
 ### 3. Propose 2–3 approaches
 
@@ -72,13 +66,13 @@ Present approaches side by side. For each:
 
 End with a recommendation and one-sentence rationale. Then ask via `AskUserQuestion`: question = `Which approach?`, header = `Approach`, options = one per proposed approach (label = name, description = one-line trade-off). `Other` lets the user steer free-form.
 
-### 4. Present design in sections, approve per section
+### 4. Present the whole design, approve once
 
-Break the chosen approach into sections scaled to complexity (typical: Goal, Scope in/out, Key decisions, Architecture sketch, Open questions). For each section:
+Present the chosen approach as one message, sectioned (typical: Goal, Scope in/out, Key decisions, Architecture sketch, Open questions). Sections are headings in that one message — **not** separate prompts.
 
-1. Present the section.
-2. Ask via `AskUserQuestion`: question = `Approve <section>?`, header = `Approve`, options = `Approve`, `Request changes` (description: `Provide change notes via Other`). User selects `Other` to type `changes: ...` free-form.
-3. On a change request, revise that section and re-ask. Do not advance until the user approves.
+Then ask **once** via `AskUserQuestion`: question = `Approve this design?`, header = `Approve`, options = `Approve`, `Request changes` (description: `Name the sections to change via Other`).
+
+On a change request, revise only the named sections, re-present the full design, and re-ask the same single question. Do not approve section by section — that was up to 5 blocking round trips for one decision the user makes holistically anyway.
 
 Keep sections short. Do not pad.
 
@@ -120,9 +114,10 @@ Then:
 Before issuing the hand-off prompt, verify:
 
 - [ ] Project context was scanned.
-- [ ] Clarifying questions were asked one at a time.
+- [ ] Clarifying questions were batched (≤ 2 `AskUserQuestion` calls, up to 4 questions each).
 - [ ] 2–3 approaches with trade-offs were presented.
-- [ ] Design was presented in sections, each approved.
+- [ ] Design was presented in full in one message and approved with one prompt.
+- [ ] Total blocking prompts for the run ≤ 4.
 - [ ] Slug is kebab-case, ≤ 4 words, collision-resolved.
 - [ ] `docs/ultra-dev/<slug>/` exists and is empty.
 - [ ] No spec.md, plan.md, or code was written.

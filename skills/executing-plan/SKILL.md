@@ -20,7 +20,7 @@ All fixed-choice prompts in this skill (slug pick, entry-prompt overrides, ERD-a
 ## Conventions (verbatim)
 
 - **Slug rule:** kebab-case, max 4 words, lowercase. Collision suffix `-2`, `-3`, ... pick the lowest free integer.
-- **Per-feature dir:** `docs/ultra-dev/<slug>/` contains `spec.md`, `plan.md`, and `notes.md`. `notes.md` is the failure / doc log; create it on first append by copying `templates/notes.md` from the repo root (fall back to a bare `# Notes: <Feature title>` header if the template is missing).
+- **Per-feature dir:** `docs/ultra-dev/<slug>/` contains `spec.md`, `plan.md`, and `notes.md`. `notes.md` is the failure / doc log; create it on first append by copying `${CLAUDE_PLUGIN_ROOT}/templates/notes.md` (fall back to a bare `# Notes: <Feature title>` header if the template is missing).
 
 ## Process
 
@@ -66,7 +66,7 @@ On `Accept all defaults` → use defaults as-is.
 
 On `Defaults, stay on current branch` → use defaults with `branch=current`. The step-4 main/master refusal still applies: if the current branch is `main` or `master`, warn and force `branch=new`.
 
-On `Customize` → issue 6 sequential `AskUserQuestion` calls, one per setting. Skip a setting if its current value already matches the only sensible choice. Use these option sets exactly:
+On `Customize` → issue **two** `AskUserQuestion` calls, not six: the first carries `branch`, `worktree`, `subagents`, `commits`; the second carries `commit-format`, `review-cadence`. `AskUserQuestion` takes up to 4 questions per call — fill it. Skip a setting if its current value already matches the only sensible choice (if that empties the second call, skip the call). Use these option sets exactly:
 
 | Setting | Header | Options |
 |---|---|---|
@@ -176,7 +176,7 @@ Failure = the task's `verify:` command exited non-zero, OR `code-review` raised 
 1. **Debug step:** read the error output, locate the likely cause (file, line, symbol), attempt a fix. Re-read `## Interfaces` — most batch failures are rename / signature drift.
 2. **Retry the task:** re-run the task and its `verify:` command from the top.
 3. **Up to 3 attempts total** (initial run + 2 retries, or any equivalent count to 3).
-4. **On the 3rd failure:** stop the plan. Append an entry to `docs/ultra-dev/<slug>/notes.md` under the `## Failure log` section (create the file from `templates/notes.md` if missing):
+4. **On the 3rd failure:** stop the plan. Append an entry to `docs/ultra-dev/<slug>/notes.md` under the `## Failure log` section (create the file from `${CLAUDE_PLUGIN_ROOT}/templates/notes.md` if missing):
 
 ```
 ## <ISO timestamp> — Task <N> failed

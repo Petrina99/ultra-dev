@@ -41,7 +41,7 @@ Fixed-choice prompts in this skill (slug pick, chain prompt) MUST use the `AskUs
 
 Read `spec.md` end-to-end. Map every acceptance-criteria item to at least one task.
 
-Copy the skeleton from `templates/plan.md` (repo root) into `docs/ultra-dev/<slug>/plan.md`, then replace `<Feature title>` and the example task / dependency / interface / verification lines with the real content. Strip the HTML comment block after filling. Sections, in this exact order — same as the template:
+Copy the skeleton from `${CLAUDE_PLUGIN_ROOT}/templates/plan.md` into `docs/ultra-dev/<slug>/plan.md`, then replace `<Feature title>` and the example task / dependency / interface / verification lines with the real content. Strip the HTML comment block after filling. Sections, in this exact order — same as the template:
 
 1. `# Plan: <Feature title>` header + `Spec: ./spec.md` link
 2. `## Tasks`
@@ -50,7 +50,7 @@ Copy the skeleton from `templates/plan.md` (repo root) into `docs/ultra-dev/<slu
 5. `## Verification`
 6. `## Smoke Tests`
 
-If `templates/plan.md` is missing, fall back to writing the same five sections inline.
+If `${CLAUDE_PLUGIN_ROOT}/templates/plan.md` is missing, fall back to writing the same five sections inline.
 
 #### Task format (exact)
 

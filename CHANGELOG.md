@@ -2,6 +2,19 @@
 
 All notable changes to `ultra-dev-plugin` are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [SemVer](https://semver.org/).
 
+## [1.10.0] — 2026-08-21
+
+### Fixed
+
+- `spec-writing`, `spec-to-plan`, `research`, `executing-plan`: template lookups pointed at `templates/<file>.md` "(repo root)" — the *user's* repo, which never contains them — so every run silently fell through to the "template missing, write inline" path and `templates/{spec,plan,notes,research}.md` were dead files. Now resolved via `${CLAUDE_PLUGIN_ROOT}/templates/`, matching the fix already applied to `smoke-tests.html`.
+
+### Changed
+
+- `brainstorm`: clarifying questions are batched (up to 4 per `AskUserQuestion` call, hard ceiling of 2 calls) instead of asked one at a time, the research offer rides in the first batch instead of its own prompt, and the design is presented in full and approved with a single prompt instead of section by section. Budget for the whole skill is now ≤ 4 blocking prompts, down from 8–14.
+- `executing-plan`: the `Customize` entry flow issues 2 batched `AskUserQuestion` calls instead of 6 sequential ones.
+- `user-manual-writing`: replaced "open every annotated PNG and eyeball it" with a harness-enforced check plus a one-or-two-per-chapter spot check. `annotate.ts` now **throws** (was `console.warn`) when a marker resolves to ≠ 1 element, has no bounding box, or falls outside the viewport, so a green run already proves markers are unique, visible, and in frame. Reading every screenshot into context was the single most expensive thing the skill did.
+- `user-manual-writing`: prose + capture now run chapter by chapter (render once at the end) rather than whole-manual-in-one-context; `outline.md`'s feature→section map scopes re-shoots on updates.
+
 ## [1.9.0] — 2026-07-01
 
 ### Added

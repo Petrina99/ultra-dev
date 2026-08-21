@@ -69,7 +69,7 @@ Keep notes terse. The doc is LLM context, not a tutorial.
 
 ### 4. Write `docs/ultra-dev/<slug>/research.md`
 
-Copy the skeleton from `templates/research.md` (repo root) and fill it. If the template is missing (vendored install), write the same structure inline.
+Copy the skeleton from `${CLAUDE_PLUGIN_ROOT}/templates/research.md` and fill it. If the template is missing (vendored install), write the same structure inline.
 
 Required sections, in order:
 
@@ -159,7 +159,7 @@ Behavior:
 - [ ] Slug resolved.
 - [ ] Targets gathered (or `suggest` list confirmed).
 - [ ] context7 used for every target that exists there; one official-site fetch otherwise.
-- [ ] `docs/ultra-dev/<slug>/research.md` written from `templates/research.md`.
+- [ ] `docs/ultra-dev/<slug>/research.md` written from `${CLAUDE_PLUGIN_ROOT}/templates/research.md`.
 - [ ] Every item has a pinned version and at least one official link.
 - [ ] Self-review pass complete.
 - [ ] Chat summary printed.

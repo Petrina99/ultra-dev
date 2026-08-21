@@ -93,7 +93,13 @@ Screenshots of authenticated screens need a login, but credentials must never la
 3. Copy `templates/auth.setup.ts` into the harness (e.g. `e2e/user-manual/auth.setup.ts`) and adjust its login-form selectors to the target app's actual login page. Run it once per role — it logs in and saves Playwright `storageState` to `e2e/user-manual/.auth/<role>.json` (also gitignored).
 4. Screenshot specs reuse the saved session instead of logging in per shot: `test.use({ storageState: "e2e/user-manual/.auth/<role>.json" })` on the relevant project/describe block. Re-run step 3 for a role only when its session expires or credentials change.
 
-### 5. Prose (house style)
+### 5. Work one chapter at a time
+
+Steps 5–7 run **per chapter**, not per manual: draft that chapter's prose → capture its shots → spot-check → move on. Render (step 8) once at the end over the whole `.md`.
+
+A whole manual's prose plus every screenshot in one pass is what makes this skill crawl. `outline.md`'s chapter list is the work queue; on an update, its feature→section map scopes which chapters and which screenshot specs actually need re-running — do not re-shoot the manual because one screen changed.
+
+### 5a. Prose (house style)
 
 - Heading hierarchy: `#` cover → `##` chapter → `###` section. Steps are numbered, written in the **imperative**, each with its expected result.
 - Callouts as blockquote: `> **Note:**` / `> **Important:**` / `> **Tip:**` / `> **Role:**`.
@@ -107,8 +113,9 @@ Screenshots of authenticated screens need a login, but credentials must never la
 - If the target project has no manual-screenshot harness yet, create one under its own e2e directory (ask where — most projects already have an `e2e/` root) and copy `templates/annotate.ts` in as a fixture. Centralize marker locator lists in one `selectors.ts`-style file in that harness; don't scatter locators across specs.
 - Plain screenshot: `shot(page, outPath)`. Annotated: `shotAnnotated(page, outPath, markers, color?)` from the copied `annotate.ts`. `Marker = {target, n, label, type?: click|dblclick|scroll, place?: tl|tr|bl|br}`.
 - Selectors must be robust and **unambiguous**: `getByRole`/`getByText`/`getByPlaceholder`/`aria-label` — never CSS/utility classes.
-- **Uniqueness gotcha:** a loose selector (`getByText(/regex/).first()`, bare text match) can resolve to a *hidden or duplicate* element sharing the same label as your real target — classic case is a collapsed sidebar nav-link sharing text with a form field label. `boundingBox()` still returns a box, so the test goes green, but the marker lands on the wrong element. Fix by narrowing: exact text + a discriminator (e.g. a required-field marker like `*`), scope to the form/dialog, or switch to `getByRole`/`getByPlaceholder`. `annotate.ts` logs a `console.warn` when a marker's selector resolves to more than one element — never ignore that warning.
-- **Mandatory after capture:** open every annotated PNG and eyeball it. A green test only proves the selector resolved to *something* with a bounding box — not that it's the *right* element, or that it's fully in frame.
+- **Uniqueness gotcha:** a loose selector (`getByText(/regex/).first()`, bare text match) can resolve to a *hidden or duplicate* element sharing the same label as your real target — classic case is a collapsed sidebar nav-link sharing text with a form field label. Fix by narrowing: exact text + a discriminator (e.g. a required-field marker like `*`), scope to the form/dialog, or switch to `getByRole`/`getByPlaceholder`.
+- **The harness enforces this, not your eyes.** `shotAnnotated` **throws** when a marker resolves to ≠ 1 element, has no bounding box, or falls outside the viewport. A green run therefore already proves every marker is unique, visible, and fully in frame. When it throws, fix the selector or the viewport — never `.first()` your way past it.
+- **After capture, open at most one or two PNGs per chapter** as a spot-check on framing and legend order. Do **not** read every screenshot into context: each one is a full image payload, and a 30-shot manual read shot-by-shot is the single most expensive thing this skill can do. Read a specific PNG beyond the spot-check only when something concrete points at it (a throw you just fixed, a user complaint about one figure).
 - Off-screen/clipped fixes: raise the viewport before the shot for below-the-fold elements (e.g. `page.setViewportSize({width:1440,height:1200})`), then restore it; use `scrollIntoViewIfNeeded()` (the `scroll` marker type) for near-fold elements; raise viewport height for tall forms/detail panes that clip.
 - Run screenshots via the target project's own test runner/command, scoped to the manual's spec/tag.
 
@@ -175,7 +182,8 @@ UI change → refresh prose per `outline.md`'s feature→section map → re-run 
 - Do not invent test credentials — ask the user.
 - Do not write credentials anywhere except the gitignored `.env` (step 4a) — not into config, outline, prose, or commits.
 - Do not auto-install Playwright browsers or `pymupdf` without an explicit `yes`.
-- Do not skip the visual PNG check after capture.
+- Do not read every screenshot into context — spot-check one or two per chapter (step 6).
+- Do not bypass an `annotate.ts` throw with `.first()` or by dropping the marker — fix the selector or the viewport.
 - Do not ship a manual with a missing logo — stop and ask instead of falling back silently.
 - Do not chain into or from `project-docs` — pick one per invocation.
 
@@ -185,8 +193,9 @@ UI change → refresh prose per `outline.md`'s feature→section map → re-run 
 - [ ] Slug picked (existing or new).
 - [ ] `outline.md` and any prior `<slug>.md` read for context.
 - [ ] App reachable; credentials sourced from the user, not invented.
+- [ ] Worked chapter by chapter, not whole-manual-at-once.
 - [ ] Prose follows house style; legal section present only if configured.
-- [ ] Screenshots captured; annotated ones visually verified against their markers.
+- [ ] Screenshots captured; harness throw-free; one or two spot-checked per chapter.
 - [ ] Logo present per manual; brand accent applied.
 - [ ] PDF rendered; protected + verified if `config.protect.enabled`.
 - [ ] Artifact paths reported; commit left to the user.

@@ -1,6 +1,7 @@
 ---
 name: user-manual-writing
 description: Build or update a branded end-user PDF manual under docs/user-manual/<slug>/ — prose + real annotated screenshots (Playwright) of the running app + brand/logo + optional legal notice + optional AES-256 protected PDF. Slash-only, never auto-triggers. Standalone from the core ultra-dev chain.
+argument-hint: "manual slug, or nothing to pick from existing"
 ---
 
 # user-manual-writing
@@ -44,7 +45,7 @@ ${CLAUDE_SKILL_DIR}/
 
 ## Prompting
 
-Fixed-choice prompts (new-vs-existing manual, missing-dependency installs, protect on/off) MUST go through `AskUserQuestion`. Free-form values (brand name, base URL, legal notice text, owner password, slug) stay plain text.
+Fixed-choice prompts (new-vs-existing manual, missing-dependency installs, protect on/off) MUST go through `AskUserQuestion`. Free-form values (brand name, base URL, legal notice text, owner password, slug) stay plain text. **Presentation:** `header` is a chip — keep it ≤ 12 characters; every option carries a one-line `description` naming the trade-off; the recommended option goes first and its label ends with ` (Recommended)`.
 
 ## Triggers
 
@@ -65,7 +66,7 @@ Look for `docs/user-manual/manual.config.json`. If missing, copy `templates/manu
 
 ### 2. Pick the manual slug
 
-List `docs/user-manual/*/` directories. Ask via `AskUserQuestion` whether to update an existing one or create a new one (kebab-case, max 4 words — same slug rule as the rest of the plugin).
+If the skill was invoked with a slug as its argument, use it — existing dir means update, otherwise new — and skip this prompt. Otherwise list `docs/user-manual/*/` directories and ask via `AskUserQuestion` whether to update an existing one or create a new one (kebab-case, max 4 words — same slug rule as the rest of the plugin).
 
 ### 3. Read before work
 

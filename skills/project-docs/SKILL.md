@@ -1,6 +1,7 @@
 ---
 name: project-docs
 description: Generates professional end-user or developer project documentation as a PDF with table of contents, working internal/external links, and image placeholders. Does NOT auto-trigger and is NOT chained from other skills — runs only when the user invokes `/project-docs` explicitly. Scans the repo (routes, entry points, public APIs, CLI commands, config) and writes Markdown + a rendered PDF into `docs/user-guide/` or `docs/dev-guide/`. Image folder is auto-gitignored.
+argument-hint: "user | dev | both — omit to be asked"
 ---
 
 # project-docs
@@ -42,6 +43,8 @@ Which documentation to generate?
 ```
 
 Stop on `cancel`. On `b`, run the user-guide flow first, then the dev-guide flow.
+
+If the skill was invoked with `user`, `dev`, or `both` as its argument, skip this prompt and take that as the answer.
 
 ### 2. Scan the repo
 

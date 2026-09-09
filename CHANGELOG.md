@@ -2,6 +2,29 @@
 
 All notable changes to `ultra-dev-plugin` are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [SemVer](https://semver.org/).
 
+## [1.13.0] — 2026-09-09
+
+### Added
+
+- `hooks/`: first hook in the plugin — a `SessionStart` hook (`ultra-dev-banner.js`) that reads the `<!-- ultra-dev:settings … -->` line from the project's `CLAUDE.md` and echoes one banner line (`ULTRA-DEV — routing=… · tests=… · docs=… · adhd=…`). With `adhd=on` it also re-arms the `i-have-adhd` output style, so a persisted mode is visible instead of silently inherited. Silent in repos with no managed block; skipped entirely when `node` is absent. Self-check: `node hooks/ultra-dev-banner.js --self-check`.
+- `setup-ultra-dev`: the managed block now carries a machine-readable settings line (`routing` · `tests` · `docs` · `adhd`) as its second line, so the banner hook and `executing-plan` read keys instead of parsing prose.
+- Slash-only skills gained `argument-hint` frontmatter, shown in the `/` menu: `/setup-ultra-dev <setting>`, `/i-have-adhd off`, `/project-docs user|dev|both`, `/user-manual-writing <slug>`. Each skill now honors that argument and skips the prompt it answers.
+
+### Changed
+
+- All skills that prompt: added one shared presentation rule to their prompting contract — `header` ≤ 12 characters (it renders as a chip), every option carries a one-line `description`, recommended option first with `(Recommended)` in its label. `erd-writing`'s `Non-local host` / `Install driver` headers were over the limit and are now `Remote host` / `Driver`.
+- `executing-plan`: reads the `ultra-dev:settings` line rather than the block's prose when deciding which aux skills to auto-run or hide.
+
+## [1.12.0] — 2026-09-09
+
+### Added
+
+- `setup-ultra-dev`: new aux skill — per-project setup, slash-only (`/setup-ultra-dev`). One batched `AskUserQuestion` (routing scope, `test-writing` after a plan, `doc-writing` after a plan, `i-have-adhd` mode) written as a marker-delimited managed block in the project's `CLAUDE.md`, so the settings reload every session without a hook or state file. Idempotent: re-running rewrites only the block, and is the way to flip a setting or turn ADHD mode off permanently. Block skeleton lives at `templates/claude-md-block.md`.
+
+### Changed
+
+- `executing-plan`: the end-of-plan aux step now reads the `setup-ultra-dev` block in `CLAUDE.md` first — an aux skill pinned to *automatically* runs without a prompt, one pinned to *never* is dropped from the menu, and anything unpinned still goes through the menu as before. No block means unchanged behavior.
+
 ## [1.11.0] — 2026-09-09
 
 ### Added

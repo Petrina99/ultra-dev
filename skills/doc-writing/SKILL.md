@@ -9,7 +9,7 @@ Post-hoc documentation generator. Runs against recent changes on the current bra
 
 ## Prompting
 
-Fixed-choice prompts (artifact menu, changelog-create confirm, README edit confirm) MUST be issued via the `AskUserQuestion` tool so the user picks with arrow keys. The artifact menu uses `multiSelect = true`.
+Fixed-choice prompts (artifact menu, changelog-create confirm, README edit confirm) MUST be issued via the `AskUserQuestion` tool so the user picks with arrow keys. The artifact menu uses `multiSelect = true`. **Presentation:** `header` is a chip — keep it ≤ 12 characters; every option carries a one-line `description` naming the trade-off; the recommended option goes first and its label ends with ` (Recommended)`.
 
 ## When this skill runs
 

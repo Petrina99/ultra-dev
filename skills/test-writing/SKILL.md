@@ -9,7 +9,7 @@ Generate tests for code that already exists. POST-HOC ONLY. Never write a failin
 
 ## Prompting
 
-Fixed-choice prompts (framework pick when ambiguous, test-selection menu) MUST be issued via the `AskUserQuestion` tool. The selection menu uses `multiSelect = true` with one option per proposed test; `Other` accepts free-form indices for users who prefer that.
+Fixed-choice prompts (framework pick when ambiguous, test-selection menu) MUST be issued via the `AskUserQuestion` tool. The selection menu uses `multiSelect = true` with one option per proposed test; `Other` accepts free-form indices for users who prefer that. **Presentation:** `header` is a chip — keep it ≤ 12 characters; every option carries a one-line `description` naming the trade-off; the recommended option goes first and its label ends with ` (Recommended)`.
 
 ## Triggers
 

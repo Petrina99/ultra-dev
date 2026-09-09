@@ -17,7 +17,7 @@ Auto-fire on prompts that mention: feature, change, build, component, functional
 - Do not invoke any other skill until the user types `yes` at the final prompt.
 - Every brainstorm produces a design, even for "trivial" requests. The design may be three sentences; it must still be presented and approved.
 - **Batch questions.** `AskUserQuestion` takes up to 4 questions per call — always fill the call. Never ask one question per turn; every extra call is a full round trip the user waits on. Budget for the whole skill: **≤ 4 blocking prompts** (clarifiers, approach, design approval, hand-off).
-- **Prompting**: every fixed-choice prompt in this skill (clarifiers, approach pick, approve/changes, hand-off) MUST be issued via the `AskUserQuestion` tool so the user picks with arrow keys. Use `Other` for free-text (e.g. `changes: ...`). Only fall back to plain-text prompts when the answer is genuinely free-form (slug name override, long descriptions).
+- **Prompting**: every fixed-choice prompt in this skill (clarifiers, approach pick, approve/changes, hand-off) MUST be issued via the `AskUserQuestion` tool so the user picks with arrow keys. Use `Other` for free-text (e.g. `changes: ...`). Only fall back to plain-text prompts when the answer is genuinely free-form (slug name override, long descriptions). **Presentation:** `header` is a chip — keep it ≤ 12 characters; every option carries a one-line `description` naming the trade-off; the recommended option goes first and its label ends with ` (Recommended)`.
 
 ## Process
 

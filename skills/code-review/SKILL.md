@@ -9,7 +9,7 @@ Standalone code review skill. Diffs the current branch against its base, reports
 
 ## Prompting
 
-Fixed-choice prompts (base-branch fallback pick) MUST be issued via the `AskUserQuestion` tool so the user picks with arrow keys.
+Fixed-choice prompts (base-branch fallback pick) MUST be issued via the `AskUserQuestion` tool so the user picks with arrow keys. **Presentation:** `header` is a chip — keep it ≤ 12 characters; every option carries a one-line `description` naming the trade-off; the recommended option goes first and its label ends with ` (Recommended)`.
 
 ## Triggers
 

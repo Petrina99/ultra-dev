@@ -9,7 +9,7 @@ Run the bundled `erd.mjs` (next to this SKILL.md) to introspect a relational dat
 
 ## Prompting
 
-Fixed-choice prompts (confirm intent, engine pick, non-local host confirm, install driver confirm, slug pick) MUST be issued via the `AskUserQuestion` tool so the user picks with arrow keys. Free-form prompts (connection string, schema name, output dir) stay plain text.
+Fixed-choice prompts (confirm intent, engine pick, non-local host confirm, install driver confirm, slug pick) MUST be issued via the `AskUserQuestion` tool so the user picks with arrow keys. Free-form prompts (connection string, schema name, output dir) stay plain text. **Presentation:** `header` is a chip — keep it ≤ 12 characters; every option carries a one-line `description` naming the trade-off; the recommended option goes first and its label ends with ` (Recommended)`.
 
 ## Bundle layout
 
@@ -61,7 +61,7 @@ Then, by engine:
 - `sqlite`    → ask for the `.db` / `.sqlite` file path. Skip the schema question.
 - `sqlserver` → ask for the connection string (mention `TrustServerCertificate=true` is often needed locally). Ask for schema name (default: `dbo`).
 
-If the host in the connection string is not `localhost` / `127.0.0.1` / `::1`, ask once via `AskUserQuestion` (question = `Host <hostname> is not local. Connect anyway?`, header = `Non-local host`, options = `No — stop`, `Yes — connect`).
+If the host in the connection string is not `localhost` / `127.0.0.1` / `::1`, ask once via `AskUserQuestion` (question = `Host <hostname> is not local. Connect anyway?`, header = `Remote host`, options = `No — stop`, `Yes — connect`).
 
 Stop on `No`.
 
@@ -79,7 +79,7 @@ Title default: `<Feature title> — DB ERD` if a `spec.md` exists for the slug a
 
 The script exits with code `2` and prints `Missing dependency. Run: npm install <pkg>` if the engine driver is not installed.
 
-When that happens, surface the message verbatim and ask via `AskUserQuestion` (question = `Driver missing. Install <pkg> now?`, header = `Install driver`, options = `Yes — install`, `No — stop`).
+When that happens, surface the message verbatim and ask via `AskUserQuestion` (question = `Driver missing. Install <pkg> now?`, header = `Driver`, options = `Yes — install`, `No — stop`).
 
 - `Yes` → run `npm install <pkg>`. Re-run the script.
 - `No` → stop. Leave nothing on disk.

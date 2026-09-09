@@ -9,7 +9,7 @@ Execute the plan at `docs/ultra-dev/<slug>/plan.md`. Drive batches, commits, and
 
 ## Prompting
 
-All fixed-choice prompts in this skill (slug pick, entry-prompt overrides, ERD-after-db, failure menu, aux menu, worktree menu) MUST be issued via the `AskUserQuestion` tool. The user picks via arrow keys; `Other` accepts free-text. Free-form prompts (branch name) stay plain text.
+All fixed-choice prompts in this skill (slug pick, entry-prompt overrides, ERD-after-db, failure menu, aux menu, worktree menu) MUST be issued via the `AskUserQuestion` tool. The user picks via arrow keys; `Other` accepts free-text. Free-form prompts (branch name) stay plain text. **Presentation:** `header` is a chip — keep it ≤ 12 characters; every option carries a one-line `description` naming the trade-off; the recommended option goes first and its label ends with ` (Recommended)`.
 
 ## Triggers
 
@@ -204,6 +204,8 @@ After the run completes (verify-clean, before aux menu), make sure `docs/ultra-d
 
 ### 7. End-of-plan aux menu
 
+First check the project's `CLAUDE.md` for the settings line `setup-ultra-dev` writes — `<!-- ultra-dev:settings routing=… tests=… docs=… adhd=… -->`. `tests=auto` / `docs=auto` means run that skill without offering it; `tests=never` / `docs=never` drops it from the options; `ask` (or a missing key) leaves it in the menu. Everything not pinned by the block still goes through the menu below. If there is no block, the menu covers all four.
+
 After all batches complete (verify-clean), ask via `AskUserQuestion` (multiSelect = true):
 
 - Question: `Plan executed. Run aux skills?`
@@ -259,7 +261,7 @@ If `worktree=no`, skip this step entirely.
 - Do not spawn parallel subagents yourself when `subagents=no`.
 - Do not mark a task `[x]` or commit it before its `verify:` command exits 0 (or its manual verify passes).
 - Do not rename or re-shape any symbol listed in `## Interfaces` — including in subagents.
-- Do not invoke `test-writing` or `doc-writing` mid-run; they belong to the end-of-plan aux menu only. (`erd-writing` may run mid-run via the `db`-tag prompt; `code-review` runs mid-run only via the `review-cadence` setting.)
+- Do not invoke `test-writing` or `doc-writing` mid-run; they belong to the end-of-plan step only (menu, or auto-run per the `CLAUDE.md` ultra-dev block). (`erd-writing` may run mid-run via the `db`-tag prompt; `code-review` runs mid-run only via the `review-cadence` setting.)
 - Do not reference `commands/` or slash commands.
 - Do not validate task tags.
 - Do not remove the worktree on `Skip`.

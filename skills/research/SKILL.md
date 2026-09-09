@@ -9,7 +9,7 @@ Produce a terse, version-pinned research document for an upcoming feature. One r
 
 ## Prompting
 
-Fixed-choice prompts (slug pick, overwrite/append, hand-off) MUST be issued via the `AskUserQuestion` tool. Free-form prompts (research target list) stay plain text.
+Fixed-choice prompts (slug pick, overwrite/append, hand-off) MUST be issued via the `AskUserQuestion` tool. Free-form prompts (research target list) stay plain text. **Presentation:** `header` is a chip — keep it ≤ 12 characters; every option carries a one-line `description` naming the trade-off; the recommended option goes first and its label ends with ` (Recommended)`.
 
 ## Triggers
 

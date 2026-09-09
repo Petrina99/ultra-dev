@@ -8,7 +8,7 @@
 
 Brainstorm → Spec → Plan → Execute. The human drives every hand-off.
 
-[![Version](https://img.shields.io/badge/version-1.11.0-blue.svg)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-1.13.0-blue.svg)](.claude-plugin/plugin.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-8A2BE2.svg)](https://docs.claude.com/en/docs/claude-code)
 [![Inspired by superpowers](https://img.shields.io/badge/inspired%20by-superpowers-orange.svg)](https://github.com/obra/superpowers)
 
@@ -16,7 +16,7 @@ Brainstorm → Spec → Plan → Execute. The human drives every hand-off.
 
 ## Overview
 
-`ultra-dev-plugin` chains four core skills — **brainstorm**, **spec-writing**, **spec-to-plan**, **executing-plan** — into a single deliberate workflow. Eight optional aux skills — **research**, **code-review**, **test-writing**, **doc-writing**, **erd-writing**, **project-docs**, **user-manual-writing**, **i-have-adhd** — run on demand.
+`ultra-dev-plugin` chains four core skills — **brainstorm**, **spec-writing**, **spec-to-plan**, **executing-plan** — into a single deliberate workflow. Nine optional aux skills — **research**, **code-review**, **test-writing**, **doc-writing**, **erd-writing**, **project-docs**, **user-manual-writing**, **i-have-adhd**, **setup-ultra-dev** — run on demand.
 
 The `research` skill depends on the [`context7`](https://github.com/upstash/context7) MCP server for live, version-accurate library docs. **Install it yourself** before using `research` — see [Optional: context7 for `research`](#optional-context7-for-research) below.
 
@@ -60,6 +60,14 @@ In Claude Code, run:
 ```
 
 Restart Claude Code so the skills register. They become available via the `Skill` tool and via the auto-trigger keywords listed below.
+
+Then, in each project you want to use the plugin in:
+
+```bash
+/setup-ultra-dev
+```
+
+Four questions, one managed block written into that project's `CLAUDE.md` — see [setup-ultra-dev](#setup-ultra-dev). Optional; every skill works without it.
 
 ### Optional: context7 for `research`
 
@@ -173,6 +181,7 @@ Drives batches per the plan's `## Dependencies`, dispatches parallel subagents w
 | [`project-docs`](skills/project-docs/SKILL.md) | no (slash-only) | scan repo, draft user or developer guide, render to PDF with TOC + image placeholders |
 | [`user-manual-writing`](skills/user-manual-writing/SKILL.md) | no (slash-only) | branded end-user manual with real annotated app screenshots (Playwright) + optional AES-256 protected PDF |
 | [`i-have-adhd`](skills/i-have-adhd/SKILL.md) | no (slash-only) | output-style flag — reshapes every later answer for an ADHD reader until switched off |
+| [`setup-ultra-dev`](skills/setup-ultra-dev/SKILL.md) | no (slash-only) | per-project setup — writes the routing + auto-aux + ADHD settings into `CLAUDE.md` |
 
 ### research
 
@@ -252,6 +261,31 @@ Turn it off with **"stop adhd mode"** or **"normal mode"**.
 
 > Does **not** auto-trigger and is **not** chained from any other skill. Runs only when the user invokes `/i-have-adhd` explicitly.
 
+### setup-ultra-dev
+
+Per-project setup. Asks four questions in one prompt and writes the answers as a managed block in the project's `CLAUDE.md` (between `<!-- ultra-dev:start -->` / `<!-- ultra-dev:end -->` markers — nothing outside them is touched):
+
+1. **Routing** — which work goes through the chain: features and multi-file changes, everything but one-liners, or nothing unless invoked explicitly.
+2. **Tests** — after a plan verifies clean, run `test-writing` automatically, offer it in the aux menu (default), or never.
+3. **Docs** — same three choices for `doc-writing`.
+4. **ADHD mode** — `i-have-adhd` off, on for this session only, or always on in this project.
+
+`CLAUDE.md` is the config store on purpose: it loads every session in that repo, so the settings survive restarts, `/clear`, and compaction with no state file. The block's second line is machine-readable — `<!-- ultra-dev:settings routing=features tests=auto docs=ask adhd=on -->` — and both `executing-plan` and the session banner read it.
+
+Re-run the skill any time to change a setting, or pass the one you want: `/setup-ultra-dev adhd`. That is also how you turn ADHD mode off permanently.
+
+### Session banner
+
+Once a project has the block, a `SessionStart` hook prints its settings at the top of every session in that repo:
+
+```text
+ULTRA-DEV — routing=features · tests=auto · docs=ask · adhd=on
+```
+
+With `adhd=on` it also re-arms the `i-have-adhd` output style, so a persisted mode is visible instead of silently inherited. Repos without the block get nothing, and the hook is skipped when `node` is not on `PATH`.
+
+> Does **not** auto-trigger and is **not** chained from any other skill. Runs only when the user invokes `/setup-ultra-dev` explicitly.
+
 ---
 
 ## Usage
@@ -261,6 +295,17 @@ Two entry points:
 - **Auto-trigger** — type a phrase matching a skill's triggers.
   Example: *"Add a chat widget that connects to an AI chat service"* → `brainstorm` fires.
 - **Explicit** — invoke a skill by name via the `Skill` tool (useful when resuming a feature mid-flow).
+
+The slash-only skills take an optional argument, shown as a hint in the `/` menu:
+
+| Command | Argument |
+| --- | --- |
+| `/setup-ultra-dev` | one setting to change — `routing` · `tests` · `docs` · `adhd` |
+| `/i-have-adhd` | `off` to turn the output style off |
+| `/project-docs` | `user` · `dev` · `both` |
+| `/user-manual-writing` | a manual slug |
+
+Omit it and the skill asks, as before.
 
 Once `brainstorm` runs, the chain advances on each `yes`:
 
@@ -276,7 +321,7 @@ Aux skills (`code-review`, `test-writing`, `doc-writing`) run from the end-of-pl
 
 ## Recommended CLAUDE.md guidance
 
-Paste this block into your project's `CLAUDE.md` (or `~/.claude/CLAUDE.md` for global) so Claude knows when to route work through the plugin instead of jumping straight to code:
+`/setup-ultra-dev` writes this for you. To do it by hand, paste the block into your project's `CLAUDE.md` (or `~/.claude/CLAUDE.md` for global) so Claude knows when to route work through the plugin instead of jumping straight to code:
 
 ```markdown
 ## Workflow routing
@@ -314,6 +359,9 @@ If unsure, lean on the plugin — the upfront `brainstorm` is cheap and the spec
 .claude-plugin/
   plugin.json          # plugin manifest
   marketplace.json     # marketplace manifest
+hooks/
+  hooks.json           # SessionStart registration
+  ultra-dev-banner.js  # echoes the CLAUDE.md settings line each session
 skills/
   brainstorm/SKILL.md
   spec-writing/SKILL.md
@@ -347,11 +395,13 @@ skills/
       manual.md             # prose scaffold (house style, legal-notice slot, glossary)
       annotate.ts            # generic Playwright marker/legend screenshot helper
   i-have-adhd/SKILL.md   # output-style flag, slash-only
+  setup-ultra-dev/SKILL.md  # per-project setup, slash-only
 templates/
   spec.md              # skeleton dropped by spec-writing
   plan.md              # skeleton dropped by spec-to-plan
   notes.md             # skeleton dropped by executing-plan / doc-writing
   research.md          # skeleton dropped by research
+  claude-md-block.md   # managed CLAUDE.md block written by setup-ultra-dev
 ```
 
 ---

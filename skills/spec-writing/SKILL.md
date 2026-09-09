@@ -9,7 +9,7 @@ Convert a brainstorming conversation (or equivalent context already in the sessi
 
 ## Prompting
 
-Every fixed-choice prompt in this skill (slug pick, chain prompt) MUST be issued via the `AskUserQuestion` tool so the user picks with arrow keys. `Other` covers free-text (e.g. `changes: ...`). Plain-text prompts only when the answer is genuinely free-form.
+Every fixed-choice prompt in this skill (slug pick, chain prompt) MUST be issued via the `AskUserQuestion` tool so the user picks with arrow keys. `Other` covers free-text (e.g. `changes: ...`). Plain-text prompts only when the answer is genuinely free-form. **Presentation:** `header` is a chip — keep it ≤ 12 characters; every option carries a one-line `description` naming the trade-off; the recommended option goes first and its label ends with ` (Recommended)`.
 
 ## Triggers
 

@@ -2,6 +2,12 @@
 
 All notable changes to `ultra-dev-plugin` are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [SemVer](https://semver.org/).
 
+## [1.11.0] — 2026-09-09
+
+### Added
+
+- `i-have-adhd`: new aux skill — an output-style flag rather than a workflow. `/i-have-adhd` turns on ADHD-shaped output for the rest of the session: next action first, multi-step work numbered, state restated every turn, tangents deferred, time estimates in concrete units, wins stated as what now works, no preamble/recap/closer. Documented overrides for explain requests, destructive actions, debug spirals, ambiguity, and harness constraints. Leaves the brainstorm → spec → plan → execute chain, its gates, and its written artifacts untouched. Slash-only (`disable-model-invocation`); off via "stop adhd mode" or "normal mode".
+
 ## [1.10.0] — 2026-08-21
 
 ### Fixed

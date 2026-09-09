@@ -8,7 +8,7 @@
 
 Brainstorm → Spec → Plan → Execute. The human drives every hand-off.
 
-[![Version](https://img.shields.io/badge/version-1.9.0-blue.svg)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-1.11.0-blue.svg)](.claude-plugin/plugin.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-8A2BE2.svg)](https://docs.claude.com/en/docs/claude-code)
 [![Inspired by superpowers](https://img.shields.io/badge/inspired%20by-superpowers-orange.svg)](https://github.com/obra/superpowers)
 
@@ -16,7 +16,7 @@ Brainstorm → Spec → Plan → Execute. The human drives every hand-off.
 
 ## Overview
 
-`ultra-dev-plugin` chains four core skills — **brainstorm**, **spec-writing**, **spec-to-plan**, **executing-plan** — into a single deliberate workflow. Seven optional aux skills — **research**, **code-review**, **test-writing**, **doc-writing**, **erd-writing**, **project-docs**, **user-manual-writing** — run on demand.
+`ultra-dev-plugin` chains four core skills — **brainstorm**, **spec-writing**, **spec-to-plan**, **executing-plan** — into a single deliberate workflow. Eight optional aux skills — **research**, **code-review**, **test-writing**, **doc-writing**, **erd-writing**, **project-docs**, **user-manual-writing**, **i-have-adhd** — run on demand.
 
 The `research` skill depends on the [`context7`](https://github.com/upstash/context7) MCP server for live, version-accurate library docs. **Install it yourself** before using `research` — see [Optional: context7 for `research`](#optional-context7-for-research) below.
 
@@ -172,6 +172,7 @@ Drives batches per the plan's `## Dependencies`, dispatches parallel subagents w
 | [`erd-writing`](skills/erd-writing/SKILL.md) | yes | introspect a relational DB and render an ERD (`erd.md` + `erd.html`) into the slug dir |
 | [`project-docs`](skills/project-docs/SKILL.md) | no (slash-only) | scan repo, draft user or developer guide, render to PDF with TOC + image placeholders |
 | [`user-manual-writing`](skills/user-manual-writing/SKILL.md) | no (slash-only) | branded end-user manual with real annotated app screenshots (Playwright) + optional AES-256 protected PDF |
+| [`i-have-adhd`](skills/i-have-adhd/SKILL.md) | no (slash-only) | output-style flag — reshapes every later answer for an ADHD reader until switched off |
 
 ### research
 
@@ -238,6 +239,18 @@ Output:
 - `docs/user-manual/manual.config.json` — shared brand/app/protect config across manuals in the repo.
 
 > Does **not** auto-trigger and is **not** chained from any other skill. Runs only when the user invokes `/user-manual-writing` explicitly. Optional protection step needs the user-installed `pymupdf` Python package — not bundled with this plugin.
+
+### i-have-adhd
+
+An output-style **flag**, not a workflow. Invoke `/i-have-adhd` once and every response for the rest of the session is shaped for a reader with ADHD: the next action first, multi-step work numbered, state restated each turn ("step 3 of 5 done"), tangents deferred, time estimates in concrete units, wins stated in what-now-works terms, no preamble and no closing pleasantries.
+
+Rules bend where they would hurt: `explain`/`walk me through` requests get the full explanation, destructive actions still get a confirmation, and real ambiguity still gets one clarifying question.
+
+It changes the shape of chat output only — the brainstorm → spec → plan → execute chain keeps its gates, its `yes` hand-offs, and the full structure of `spec.md` / `plan.md` / `notes.md`.
+
+Turn it off with **"stop adhd mode"** or **"normal mode"**.
+
+> Does **not** auto-trigger and is **not** chained from any other skill. Runs only when the user invokes `/i-have-adhd` explicitly.
 
 ---
 
@@ -333,6 +346,7 @@ skills/
       outline.md           # per-manual internal outline scaffold
       manual.md             # prose scaffold (house style, legal-notice slot, glossary)
       annotate.ts            # generic Playwright marker/legend screenshot helper
+  i-have-adhd/SKILL.md   # output-style flag, slash-only
 templates/
   spec.md              # skeleton dropped by spec-writing
   plan.md              # skeleton dropped by spec-to-plan

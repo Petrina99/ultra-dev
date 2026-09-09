@@ -8,7 +8,7 @@
 
 Brainstorm → Spec → Plan → Execute. The human drives every hand-off.
 
-[![Version](https://img.shields.io/badge/version-1.14.0-blue.svg)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-1.14.1-blue.svg)](.claude-plugin/plugin.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-8A2BE2.svg)](https://docs.claude.com/en/docs/claude-code)
 [![Inspired by superpowers](https://img.shields.io/badge/inspired%20by-superpowers-orange.svg)](https://github.com/obra/superpowers)
 
@@ -180,7 +180,7 @@ Drives batches per the plan's `## Dependencies`, dispatches parallel subagents w
 | [`erd-writing`](skills/erd-writing/SKILL.md) | yes | introspect a relational DB and render an ERD (`erd.md` + `erd.html`) into the slug dir |
 | [`project-docs`](skills/project-docs/SKILL.md) | no (slash-only, enforced) | scan repo, draft user or developer guide, render to PDF with TOC + image placeholders |
 | [`user-manual-writing`](skills/user-manual-writing/SKILL.md) | no (slash-only, enforced) | branded end-user manual with real annotated app screenshots (Playwright) + optional AES-256 protected PDF |
-| [`i-have-adhd`](skills/i-have-adhd/SKILL.md) | no (slash-only) | output-style flag — reshapes every later answer for an ADHD reader until switched off |
+| [`i-have-adhd`](skills/i-have-adhd/SKILL.md) | yes (ADHD keywords, or `adhd=on` in `CLAUDE.md`) | output-style flag — reshapes every later answer for an ADHD reader until switched off |
 | [`setup-ultra-dev`](skills/setup-ultra-dev/SKILL.md) | no (slash-only) | per-project setup — writes the routing + auto-aux + ADHD settings into `CLAUDE.md` |
 
 ### research
@@ -395,7 +395,7 @@ skills/
       outline.md           # per-manual internal outline scaffold
       manual.md             # prose scaffold (house style, legal-notice slot, glossary)
       annotate.ts            # generic Playwright marker/legend screenshot helper
-  i-have-adhd/SKILL.md   # output-style flag, slash-only
+  i-have-adhd/SKILL.md   # output-style flag, /i-have-adhd or adhd=on
   setup-ultra-dev/SKILL.md  # per-project setup, slash-only
 templates/
   spec.md              # skeleton dropped by spec-writing

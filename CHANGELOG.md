@@ -2,6 +2,12 @@
 
 All notable changes to `ultra-dev-plugin` are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [SemVer](https://semver.org/).
 
+## [1.14.1] — 2026-09-09
+
+### Fixed
+
+- `i-have-adhd`: `disable-model-invocation` removed. 1.14.0 documented the skill as slash-only, but three parts of the plugin need to load it themselves — `setup-ultra-dev` step 5 ("turn it on now"), the `### Output style` line the managed block writes into `CLAUDE.md`, and the `ADHD MODE ON` banner — and every one of them failed with *cannot be used with Skill tool due to disable-model-invocation*. Persisted `adhd=on` now actually arms itself at session start.
+
 ## [1.14.0] — 2026-09-09
 
 ### Added

@@ -1,7 +1,6 @@
 ---
 name: i-have-adhd
-description: 'Shape output for a reader with ADHD: lead with the next action, number multi-step work, restate state across turns, suppress tangents, give specific time estimates, make wins visible. Slash-only (`/i-have-adhd`), never auto-triggers. Stays on for the rest of the session until "stop adhd mode".'
-disable-model-invocation: true
+description: 'Shape output for a reader with ADHD: lead with the next action, number multi-step work, restate state across turns, suppress tangents, give specific time estimates, make wins visible. Invoke on `/i-have-adhd`, when ADHD mode is on in CLAUDE.md, or when the reader asks for it. Stays on for the rest of the session until "stop adhd mode".'
 argument-hint: "nothing to turn it on, or 'off' to turn it off"
 ---
 

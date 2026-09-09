@@ -1,6 +1,6 @@
 ---
 name: erd-writing
-description: Generates an entity-relationship diagram (ERD) from a live database. Auto-triggers on database / schema / migration / ERD / diagram / table / relation / foreign-key keywords. Asks the user before introspecting; supports Postgres, SQLite, and SQL Server. Outputs erd.md (Mermaid for LLM context) and erd.html (rendered diagram for browser viewing) into the active feature directory.
+description: Generates an entity-relationship diagram from a live database (Postgres, SQLite, SQL Server) into the active feature directory. Auto-triggers on database / schema / migration / ERD / diagram / table / relation / foreign-key keywords.
 ---
 
 # erd-writing

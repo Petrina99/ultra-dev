@@ -1,6 +1,6 @@
 ---
 name: doc-writing
-description: Generate documentation artifacts (changelog, README, inline code docs, ultra-dev notes) for recent changes. Auto-triggers on docs, documentation, changelog, readme, docstring, or jsdoc keywords. Asks the user which artifacts to produce and generates only the selected ones.
+description: Generate documentation artifacts (changelog, README, inline code docs, ultra-dev notes) for recent changes. Auto-triggers on docs, documentation, changelog, readme, docstring, or jsdoc keywords.
 ---
 
 # doc-writing

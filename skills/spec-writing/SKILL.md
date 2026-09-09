@@ -1,6 +1,6 @@
 ---
 name: spec-writing
-description: Produces `docs/ultra-dev/<slug>/spec.md` from a brainstorming conversation or existing context. Does NOT auto-trigger from generic prompts; runs only when chained from `brainstorm` or invoked explicitly via the Skill tool by name.
+description: Produces docs/ultra-dev/<slug>/spec.md from a brainstorming conversation or existing context. Never auto-fires: chained from brainstorm or invoked by name.
 ---
 
 # spec-writing

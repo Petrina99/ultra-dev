@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: Reviews the current branch diff against the base branch, lists issues by severity (Blocker / Major / Minor / Nit), auto-fixes trivial issues (formatting, unused imports, dead code, comment typos), and flags everything else for the user. Auto-triggers on review / diff / PR / code-review / "review this" keywords. Works standalone on any branch in any repo; if a `docs/ultra-dev/<slug>/` directory maps to the current branch, additionally reads its `spec.md` and `plan.md` as extra context.
+description: Reviews the current branch diff against its base and lists issues by severity (Blocker / Major / Minor / Nit), auto-fixing trivial ones. Auto-triggers on review / diff / PR / code-review / "review this". Reads spec.md and plan.md as extra context when the branch maps to a docs/ultra-dev/<slug>/ directory.
 ---
 
 # code-review

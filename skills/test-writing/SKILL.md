@@ -1,6 +1,6 @@
 ---
 name: test-writing
-description: Post-hoc test generator. Auto-triggers on test, tests, testing, coverage, spec, unit test, integration test keywords. Reads files changed since the branch base, proposes a checklist of tests, and generates them on user confirmation. POST-HOC ONLY — no TDD enforcement, no failing-test-first workflow.
+description: Post-hoc test generator: reads files changed since the branch base, proposes a checklist of tests, generates them on confirmation. Auto-triggers on test, tests, testing, coverage, spec, unit test, integration test keywords.
 ---
 
 # test-writing

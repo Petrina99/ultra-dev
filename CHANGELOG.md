@@ -2,6 +2,21 @@
 
 All notable changes to `ultra-dev-plugin` are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [SemVer](https://semver.org/).
 
+## [1.14.0] — 2026-09-09
+
+### Added
+
+- `executing-plan`: resume support. A run that stops mid-plan — session ended, context compacted, failure escalated — is picked up by the next invocation instead of restarting: step 2b reads `plan.md` checkboxes, the newest `notes.md` failure entry, and `git log`/`git status` from the run's recorded base, reports `Resuming <slug>: 4 of 9 tasks done…`, and continues from the first unchecked task. Stale marks, dirty trees, and leftover worktrees are surfaced, never auto-resolved.
+- `executing-plan`: the baseline checkpoint is now written to `notes.md` under a new `## Run log` section (base commit, branch, worktree) instead of being held in context, which does not survive a compaction. `templates/notes.md` gained the section.
+
+### Fixed
+
+- `project-docs`, `user-manual-writing`: both descriptions claimed "does NOT auto-trigger", but neither set `disable-model-invocation`, so the model could still fire them and their descriptions sat in context every turn. Flag added — behavior now matches the documentation.
+
+### Changed
+
+- Every skill description rewritten as a context pointer: trigger branches kept, restated identity and body detail cut. Always-loaded description text dropped from ~3.6k to ~2.0k characters (~900 → ~500 tokens per turn, in every session where the plugin is installed).
+
 ## [1.13.0] — 2026-09-09
 
 ### Added

@@ -43,8 +43,8 @@ If the skill was invoked with an argument naming one setting (`routing`, `tests`
 | --- | --- | --- | --- |
 | 1 | `Routing` | `Which work routes through the ultra-dev chain?` | `Features & multi-file changes (Recommended)` (design discussion, new behavior, anything worth reviewing) · `Everything but one-liners` (also refactors and non-trivial bug fixes) · `Only when I invoke it` (no routing guidance; skills run on explicit request) |
 | 2 | `Tests` | `Run test-writing after a plan finishes?` | `Ask me each time (Recommended)` (the aux menu, as today) · `Automatically` (runs without asking, every plan) · `Never` (skip it in the menu) |
-| 3 | `Docs` | `Run doc-writing after a plan finishes?` | `Ask me each time` · `Automatically` · `Never` |
-| 4 | `ADHD mode` | `Turn on i-have-adhd output style?` | `Off` · `This session only` (not written to CLAUDE.md) · `Always on in this project` (persisted; stays on until explicitly turned off) |
+| 3 | `Docs` | `Run doc-writing after a plan finishes?` | `Ask me each time (Recommended)` (the aux menu, as today) · `Automatically` (runs without asking, every plan) · `Never` (skip it in the menu) |
+| 4 | `ADHD mode` | `Turn on i-have-adhd output style?` | `Off (Recommended)` (default output style) · `This session only` (not written to CLAUDE.md) · `Always on in this project` (persisted; banner re-arms it every session until explicitly turned off) |
 
 ### 3. Render the block
 

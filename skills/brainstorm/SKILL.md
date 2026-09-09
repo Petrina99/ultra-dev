@@ -1,6 +1,6 @@
 ---
 name: brainstorm
-description: Use before any creative work — designing a feature, planning a change, building a component, adding functionality, modifying behavior, scoping a UI, or shaping new build work. Explores intent, constraints, and trade-offs, derives a topic slug, and ends by offering to hand off to spec-writing.
+description: Use before any creative work — designing a feature, planning a change, building a component, adding functionality, modifying behavior, or scoping a UI. Explores intent, constraints, and trade-offs, derives a topic slug, hands off to spec-writing on approval.
 ---
 
 # Brainstorm

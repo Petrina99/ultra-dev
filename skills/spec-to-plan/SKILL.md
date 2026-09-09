@@ -1,6 +1,6 @@
 ---
 name: spec-to-plan
-description: Reads an existing spec.md and produces docs/ultra-dev/<slug>/plan.md with Tasks, Dependencies, and Verification sections. Does NOT auto-trigger; runs only when chained from spec-writing or invoked explicitly via the Skill tool by name.
+description: Turns an existing spec.md into docs/ultra-dev/<slug>/plan.md with Tasks, Dependencies, and Verification sections. Never auto-fires: chained from spec-writing or invoked by name.
 ---
 
 # spec-to-plan

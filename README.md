@@ -8,7 +8,7 @@
 
 Brainstorm → Spec → Plan → Execute. The human drives every hand-off.
 
-[![Version](https://img.shields.io/badge/version-1.13.0-blue.svg)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-1.14.0-blue.svg)](.claude-plugin/plugin.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-8A2BE2.svg)](https://docs.claude.com/en/docs/claude-code)
 [![Inspired by superpowers](https://img.shields.io/badge/inspired%20by-superpowers-orange.svg)](https://github.com/obra/superpowers)
 
@@ -178,8 +178,8 @@ Drives batches per the plan's `## Dependencies`, dispatches parallel subagents w
 | [`test-writing`](skills/test-writing/SKILL.md) | yes | post-hoc test generation for changed files |
 | [`doc-writing`](skills/doc-writing/SKILL.md) | yes | CHANGELOG, README, inline docs, `notes.md` entries |
 | [`erd-writing`](skills/erd-writing/SKILL.md) | yes | introspect a relational DB and render an ERD (`erd.md` + `erd.html`) into the slug dir |
-| [`project-docs`](skills/project-docs/SKILL.md) | no (slash-only) | scan repo, draft user or developer guide, render to PDF with TOC + image placeholders |
-| [`user-manual-writing`](skills/user-manual-writing/SKILL.md) | no (slash-only) | branded end-user manual with real annotated app screenshots (Playwright) + optional AES-256 protected PDF |
+| [`project-docs`](skills/project-docs/SKILL.md) | no (slash-only, enforced) | scan repo, draft user or developer guide, render to PDF with TOC + image placeholders |
+| [`user-manual-writing`](skills/user-manual-writing/SKILL.md) | no (slash-only, enforced) | branded end-user manual with real annotated app screenshots (Playwright) + optional AES-256 protected PDF |
 | [`i-have-adhd`](skills/i-have-adhd/SKILL.md) | no (slash-only) | output-style flag — reshapes every later answer for an ADHD reader until switched off |
 | [`setup-ultra-dev`](skills/setup-ultra-dev/SKILL.md) | no (slash-only) | per-project setup — writes the routing + auto-aux + ADHD settings into `CLAUDE.md` |
 
@@ -349,7 +349,8 @@ If unsure, lean on the plugin — the upfront `brainstorm` is cheap and the spec
 - The user approves every hand-off — no skill auto-advances.
 - Open questions in `spec.md` block the plan stage until resolved.
 - `executing-plan` refuses to commit on `main` / `master`; it forces a new branch.
-- `notes.md` is append-only — failure logs and shipped notes accumulate.
+- `notes.md` is append-only — run log, failure log, and shipped notes accumulate.
+- A plan run survives the session: `executing-plan` resumes from the first unchecked task, using `plan.md` checkboxes plus the run log's base commit.
 
 ---
 

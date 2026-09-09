@@ -1,7 +1,8 @@
 ---
 name: user-manual-writing
-description: Build or update a branded end-user PDF manual under docs/user-manual/<slug>/ — prose + real annotated screenshots (Playwright) of the running app + brand/logo + optional legal notice + optional AES-256 protected PDF. Slash-only, never auto-triggers. Standalone from the core ultra-dev chain.
+description: Build or update a branded end-user PDF manual under docs/user-manual/<slug>/ — real annotated app screenshots via Playwright, brand/logo, optional legal notice, optional AES-256 protection.
 argument-hint: "manual slug, or nothing to pick from existing"
+disable-model-invocation: true
 ---
 
 # user-manual-writing

@@ -1,6 +1,6 @@
 ---
 name: executing-plan
-description: Execute a written `docs/ultra-dev/<slug>/plan.md` end to end with configurable branch, worktree, subagent dispatch, and commit-granularity options. Does NOT auto-trigger; runs only when chained from `spec-to-plan` or invoked explicitly via the Skill tool by name.
+description: Execute a written docs/ultra-dev/<slug>/plan.md end to end, with configurable branch, worktree, subagent, and commit-granularity options. Never auto-fires: chained from spec-to-plan or invoked by name.
 ---
 
 # executing-plan
@@ -37,9 +37,43 @@ Require `docs/ultra-dev/<slug>/plan.md`. If absent:
 
 Stop. Do not proceed.
 
+### 2b. Resume check
+
+Read `## Tasks` before prompting anything. No `[x]` task means a fresh run — go to step 3.
+
+Any `[x]` task means this is a **resume**: an earlier run stopped mid-plan (session ended, context was compacted, or a failure escalated). The state is on disk — read it back rather than re-deriving it. Tasks already `[x]` stay done; the run continues from the first `[ ]` task in dependency order.
+
+Three sources, in this order:
+
+1. `plan.md` — `[x]` tasks are complete. The first `[ ]` task in dependency order is the resume point.
+2. `docs/ultra-dev/<slug>/notes.md`, `## Failure log` — if the newest entry names a task that is still `[ ]`, that task failed three times and stopped the previous run. Carry it into the prompt; do not quietly retry it.
+3. `notes.md`, `## Run log` — the newest line carries the previous run's base commit, branch, and worktree. With that base: `git log --oneline <base>..HEAD` confirms which tasks actually landed, and `git status --short` shows whether the run stopped part-way through one. No run-log line (a plan started before this section existed) means falling back to the merge-base with `main`/`master`.
+
+Also check for a leftover worktree at `../<repo-name>-<slug>`. If it exists and the current working directory is not inside it, say so — the previous run's commits are on that branch, in that directory.
+
+Reconcile the three before prompting. Report any mismatch on its own line, and let the user decide:
+
+- Task `[x]` with no commit that touches its files → the mark may be stale.
+- Dirty tree → name the modified paths; they are the interrupted task's partial work.
+
+Print the state, then ask:
+
+```
+Resuming <slug>: 4 of 9 tasks done, branch <branch>, last commit <sha> <subject>.
+Next: task 5 — <title>.
+```
+
+- Question: `Resume from task <N>?`
+- Header: `Resume`
+- Options: `Resume (Recommended)` (continue from the first unchecked task), `Re-verify done tasks` (run each `[x]` task's `verify:` command first; any that fails goes back to `[ ]` and becomes the resume point).
+
+`Other` covers anything else the user wants to do with the leftover state. Take no destructive action — no reset, no checkout, no discarding the dirty tree — without an explicit instruction.
+
+On resume, skip the setup that already happened: stay on the current branch (step 4's `branch=new` prompt does not apply) and reuse the existing worktree rather than creating a second one.
+
 ### 3. Entry prompt (single combined)
 
-Parse the plan. Count tasks (`N.` lines under `## Tasks`) and batches (entries under `## Dependencies`). Determine the smart default for `branch`: if the current branch is `main` or `master`, default is `new`; otherwise `current`.
+Parse the plan. Count tasks (`N.` lines under `## Tasks`) and batches (entries under `## Dependencies`). Determine the smart default for `branch`: if the current branch is `main` or `master`, default is `new`; otherwise `current`. On a resume (step 2b), `branch=current` and `worktree` keeps whatever the previous run set up — offer neither again, and show the summary as `4 of 9 tasks done` rather than the full task count.
 
 Print the loaded plan summary:
 
@@ -88,7 +122,13 @@ After collecting overrides, echo the final config back to the user before step 4
 - **Worktree:**
   - `worktree=yes` → create a sibling worktree at `../<repo-name>-<slug>` (`git worktree add ../<repo-name>-<slug> <branch>`) and switch the working directory to it for the rest of the run.
   - `worktree=no` → continue in the current working directory.
-- **Baseline checkpoint:** record the current `HEAD` ref so you can diff and reason about the run later.
+- **Baseline checkpoint:** append one line to `docs/ultra-dev/<slug>/notes.md` under `## Run log` (create the file from `${CLAUDE_PLUGIN_ROOT}/templates/notes.md` if missing):
+
+  ```
+  <ISO timestamp> — run started · base <sha> · branch <name> · worktree <path or none>
+  ```
+
+  Context does not survive a compaction or a new session; this line does, and step 2b reads it back as the base for `git log`.
 
 ### 5. Run loop
 
@@ -249,6 +289,7 @@ If `worktree=no`, skip this step entirely.
 - [ ] Commits granularity matches user choice.
 - [ ] Commit subject matches `commit-format` spec (default `numbered`); no `Co-Authored-By` / Claude attribution trailers.
 - [ ] Each verified task marked `[x]` in `plan.md`.
+- [ ] Resume check run before the entry prompt; `[x]` tasks left alone and the run continued from the first `[ ]`.
 - [ ] Failures retried up to 3, logged to `notes.md`, escalated via Retry / Revert+Abort / Abort menu (no Skip option).
 - [ ] `smoke-tests.html` tracker refreshed (or warning printed if template missing) and path included in end-of-plan summary.
 - [ ] Aux menu rendered after the run; selected skills dispatched in sequence.

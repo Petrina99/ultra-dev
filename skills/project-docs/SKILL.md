@@ -1,7 +1,8 @@
 ---
 name: project-docs
-description: Generates professional end-user or developer project documentation as a PDF with table of contents, working internal/external links, and image placeholders. Does NOT auto-trigger and is NOT chained from other skills — runs only when the user invokes `/project-docs` explicitly. Scans the repo (routes, entry points, public APIs, CLI commands, config) and writes Markdown + a rendered PDF into `docs/user-guide/` or `docs/dev-guide/`. Image folder is auto-gitignored.
+description: Render an end-user or developer guide for this project as a PDF — repo scan, Markdown draft, TOC, working links, image placeholders — into docs/user-guide/ or docs/dev-guide/.
 argument-hint: "user | dev | both — omit to be asked"
+disable-model-invocation: true
 ---
 
 # project-docs

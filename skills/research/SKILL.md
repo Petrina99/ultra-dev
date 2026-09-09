@@ -1,6 +1,6 @@
 ---
 name: research
-description: Researches libraries, frameworks, services, APIs, and SDKs for an upcoming feature. Pulls live docs via the user-installed `context7` MCP server, writes a terse `research.md` to the active feature directory, and prints a short chat summary. Does NOT auto-trigger from generic prompts; runs only when the user invokes it directly or accepts the research offer at the start of `brainstorm`.
+description: Researches libraries, frameworks, services, APIs, and SDKs for an upcoming feature via the user-installed context7 MCP server, and writes research.md to the active feature directory. Never auto-fires: chained from brainstorm or invoked by name.
 ---
 
 # research

@@ -2,6 +2,12 @@
 
 All notable changes to `ultra-dev-plugin` are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [SemVer](https://semver.org/).
 
+## [1.14.2] — 2026-09-09
+
+### Fixed
+
+- `hooks/hooks.json`: the Windows command used backslash path separators inside a JSON string, so the whole file failed to parse (`Invalid escape character h`) and the plugin loaded no hooks at all on Windows — the `SessionStart` banner never ran. Path now uses forward slashes, which PowerShell accepts.
+
 ## [1.14.1] — 2026-09-09
 
 ### Fixed
